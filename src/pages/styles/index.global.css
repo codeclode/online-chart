@@ -1,0 +1,44 @@
+* {
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.chartContainer {
+  transform-box: fill-box;
+}
+
+.controller {
+  cursor: move;
+  transform-box: fill-box;
+}
+
+.helper:nth-of-type(1) {
+  cursor: nw-resize;
+}
+
+.helper:nth-of-type(2), .helper:nth-of-type(7) {
+  cursor: n-resize;
+}
+
+.helper:nth-of-type(3) {
+  cursor: ne-resize;
+}
+
+.helper:nth-of-type(6) {
+  cursor: sw-resize;
+}
+
+.helper:nth-of-type(8) {
+  cursor: se-resize;
+}
+
+.helper:nth-of-type(4), .helper:nth-of-type(5) {
+  cursor: w-resize;
+}
+
+.helper:last-of-type {
+  cursor: grabbing;
+  fill: #6cf;
+}
