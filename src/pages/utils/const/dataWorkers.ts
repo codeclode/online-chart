@@ -20,7 +20,7 @@ export const dataTypeColor: Record<
   "info" | "primary" | "success" | "warning" | "default" | "error" | "secondary"
 > = {
   Date: "info",
-  number: "primary",
+  number: "error",
   string: "success",
   boolean: "warning",
 };
@@ -63,6 +63,6 @@ export const workers: DataWorkers[] = [
   {
     icon: SignalCellular3BarOutlined,
     name: "最多值",
-    limitTypes: ["Date", "number", "string"],
+    limitTypes: ["Date", "number", "string", "boolean"],
   },
 ];

@@ -30,6 +30,8 @@ export class ChartController {
     this.target.bindController(this);
     this.node = this.generateNode();
     parent.appendChild(this.node);
+    console.log(parent);
+
     this.setOrigin(this.target.origin);
     ChartController.instance = this;
     if (ChartController.setReactInstance !== null) {

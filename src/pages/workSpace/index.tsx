@@ -1,12 +1,25 @@
 import { Grid } from "@mui/material";
 import { DSVRowArray } from "d3";
-import { useState } from "react";
+import { createContext, Dispatch, SetStateAction, useState } from "react";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { AppHeader } from "~/components/appHeader";
 import { FileInput } from "~/components/fileInput";
-import { CanvasWithOptions } from "~/components/optionsHeader";
-import { DataType, DataTypeString } from "~/pages/utils/const/dataWorkers";
+import { CanvasWithOptions } from "~/components/canvas";
+import { DataTypeString } from "~/pages/utils/const/dataWorkers";
+
+export const DataContext = createContext<{
+  data: null | DSVRowArray<string>;
+  setData: null | Dispatch<SetStateAction<DSVRowArray<string> | null>>;
+  dataTypes: DataTypeString[] | null;
+  setDataTypes: null | Dispatch<SetStateAction<DataTypeString[] | null>>;
+}>({
+  data: null,
+  setData: null,
+  dataTypes: null,
+  setDataTypes: null,
+});
+
 export default function () {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const [headerHeight, setHeaderHeight] = useState(64);
@@ -18,7 +31,7 @@ export default function () {
     }
   }, [headerRef.current]);
   return (
-    <>
+    <DataContext.Provider value={{ data, setData, dataTypes, setDataTypes }}>
       <AppHeader ref={headerRef}></AppHeader>
       <Grid
         sx={{
@@ -32,24 +45,12 @@ export default function () {
         columns={24}
       >
         <Grid item xs="auto">
-          <FileInput
-            data={data}
-            dataTypes={dataTypes}
-            setData={setData}
-            setDataTypes={setDataTypes}
-            headerHeight={headerHeight}
-          ></FileInput>
+          <FileInput headerHeight={headerHeight}></FileInput>
         </Grid>
         <Grid item xs>
-          <CanvasWithOptions
-            data={data}
-            dataTypes={dataTypes}
-            setData={setData}
-            setDataTypes={setDataTypes}
-            headerHeight={headerHeight}
-          ></CanvasWithOptions>
+          <CanvasWithOptions headerHeight={headerHeight}></CanvasWithOptions>
         </Grid>
       </Grid>
-    </>
+    </DataContext.Provider>
   );
 }

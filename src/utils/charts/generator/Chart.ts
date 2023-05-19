@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 import { ChartController } from "./Controller";
 
+import * as schemes from "d3-scale-chromatic";
 export abstract class Chart {
   x: number;
   y: number;
@@ -12,7 +13,14 @@ export abstract class Chart {
   origin: string = "left top";
   node: SVGElement | null = null;
   controller: ChartController | null = null;
-  constructor(x: number, y: number, width: number, height: number) {
+  colorSet: keyof typeof schemes;
+  constructor(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    colorSet: keyof typeof schemes
+  ) {
     this.x = x;
     this.y = y;
     this.baseWidth = width;
@@ -20,6 +28,34 @@ export abstract class Chart {
     this.scaleX = 1;
     this.scaleY = 1;
     this.rotation = 0;
+    this.colorSet = colorSet;
+  }
+
+  static getCenter(
+    svg: SVGSVGElement,
+    root: SVGGElement,
+    chartWidth: number,
+    chartHeight: number
+  ) {
+    let x = 0,
+      y = 0,
+      scale = 1;
+    for (let i = 0; i < root.transform.animVal.length; i++) {
+      let m = root.transform.animVal[i];
+      if (m) {
+        if (m.type === m.SVG_TRANSFORM_SCALE) {
+          scale = m.matrix.a;
+        } else if (m.type === m.SVG_TRANSFORM_TRANSLATE) {
+          x = m.matrix.e;
+          y = m.matrix.f;
+        }
+      }
+    }
+    const { width, height } = svg.viewBox.baseVal;
+    console.log(width, height, x, y);
+    let centerX = (width / 2 - x) / scale - chartWidth / 2;
+    let centerY = (height / 2 - y) / scale - chartHeight / 2;
+    return { centerX, centerY };
   }
 
   abstract generateNode(

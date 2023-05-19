@@ -32,6 +32,7 @@ import {
   Dispatch,
   SetStateAction,
   useCallback,
+  useContext,
   useEffect,
   useRef,
   useState,
@@ -46,6 +47,7 @@ import {
 import { supportFileExt } from "~/pages/utils/const/others";
 import { CSV2Data, getFileExt } from "~/pages/utils/dataTransformer";
 import { textOver } from "~/pages/utils/styleFactory";
+import { DataContext } from "~/pages/workSpace";
 const ListTextSx: SxProps<Theme> = {
   "& .MuiListItemText-primary": {
     fontSize: "0.6em",
@@ -103,14 +105,15 @@ function ColumnItem(prop: {
       >
         <List component="div" disablePadding>
           {workers.map((worker) => {
-            return (
-              <ListItemButton sx={{ pl: 4 }}>
+            return prop.columnType !== undefined &&
+              worker.limitTypes.includes(prop.columnType) ? (
+              <ListItemButton key={worker.name} sx={{ pl: 4 }}>
                 <ListItemIcon>
                   <worker.icon />
                 </ListItemIcon>
                 <ListItemText sx={ListTextSx}>{worker.name}</ListItemText>
               </ListItemButton>
-            );
+            ) : null;
           })}
         </List>
       </Collapse>
@@ -118,14 +121,10 @@ function ColumnItem(prop: {
   );
 }
 
-export function FileInput(prop: {
-  headerHeight: number;
-  setData: Dispatch<SetStateAction<DSVRowArray<string> | null>>;
-  data: DSVRowArray<string> | null;
-  setDataTypes: Dispatch<SetStateAction<DataTypeString[] | null>>;
-  dataTypes: DataTypeString[] | null;
-}) {
+export function FileInput(prop: { headerHeight: number }) {
   const { enqueueSnackbar } = useSnackbar();
+  const dataContext = useContext(DataContext);
+  const { data, dataTypes, setData, setDataTypes } = dataContext;
   const fileRef = useRef<null | HTMLInputElement>(null);
   const fileInputRef = useRef<null | HTMLInputElement>(null);
   const [fileName, setFileName] = useState("");
@@ -133,17 +132,18 @@ export function FileInput(prop: {
   const [opens, setOpens] = useState<Array<boolean>>([]);
   const [searchKeyWord, setSearchKeyWord] = useState("");
   useEffect(() => {
-    if (prop.data) {
-      setOpens(new Array(prop.data.columns.length).fill(false));
+    if (data) {
+      setOpens(new Array(data.columns.length).fill(false));
     } else {
       setOpens([]);
     }
-  }, [prop.data]);
+  }, [data]);
   useEffect(() => {
     if (fileInputRef.current)
       setFileInputHeight(fileInputRef.current.getBoundingClientRect().height);
   }, [fileInputRef.current]);
   const fileInputHandler = useCallback(async () => {
+    if (!setData || !setDataTypes) return;
     if (fileRef.current && fileRef.current.files && fileRef.current.files[0]) {
       let file = fileRef.current.files[0];
       let fileContent = null;
@@ -153,9 +153,9 @@ export function FileInput(prop: {
         switch (ext) {
           case "csv": {
             fileContent = await CSV2Data(file);
-            prop.setData(fileContent);
+            setData(fileContent);
             let tempTypes: DataTypeString[] = [];
-            prop.setDataTypes(
+            setDataTypes(
               fileContent.columns.map((v, i) => {
                 return "string";
               })
@@ -186,7 +186,7 @@ export function FileInput(prop: {
         anchorOrigin: ct,
       });
     }
-  }, []);
+  }, [setData, setDataTypes]);
   return (
     <>
       <Stack justifyContent="space-around">
@@ -248,7 +248,7 @@ export function FileInput(prop: {
             }px)`,
           }}
         >
-          {prop.data && prop.dataTypes ? (
+          {data && dataTypes ? (
             <List
               sx={{
                 "& ul": { padding: 0 },
@@ -268,13 +268,13 @@ export function FileInput(prop: {
                 </ListSubheader>
               }
             >
-              {prop.data.columns.map((v, i) => {
+              {data.columns.map((v, i) => {
                 return v.toUpperCase().includes(searchKeyWord.toUpperCase()) ||
                   searchKeyWord == "" ? (
                   <ColumnItem
                     key={v}
                     name={v}
-                    columnType={prop.dataTypes![i]}
+                    columnType={dataTypes![i]}
                     open={opens[i]}
                     changeOpen={() => {
                       setOpens(

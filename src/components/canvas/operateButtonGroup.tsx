@@ -8,19 +8,25 @@ import {
   RestartAltOutlined,
 } from "@mui/icons-material";
 import { ButtonGroup, Button } from "@mui/material";
-import { MutableRefObject, Dispatch, SetStateAction } from "react";
+import { useSnackbar } from "notistack";
+import { MutableRefObject, Dispatch, SetStateAction, useContext } from "react";
+import { lb } from "~/pages/utils/const/anchorOrigin";
+import { DataContext } from "~/pages/workSpace";
 import { ArcChart } from "~/utils/charts/generator/Arc";
 import { ChartController } from "~/utils/charts/generator/Controller";
 import { outputSVG, outputPNG } from "~/utils/outputImg";
+import { CanvasContext } from "../canvas";
 
 export function OperateButtonGroup(prop: {
-  svgRef: MutableRefObject<SVGSVGElement | null>;
-  rootGroundRef: MutableRefObject<SVGGElement | null>;
-  setModalOpen: Dispatch<SetStateAction<boolean>>;
+  setDataModalOpen: Dispatch<SetStateAction<boolean>>;
+  setChartModalOpen: Dispatch<SetStateAction<boolean>>;
   setShowGrid: Dispatch<SetStateAction<boolean>>;
   showGrid: boolean;
 }) {
-  const { setModalOpen } = prop;
+  const { svgRef, rootGroupRef } = useContext(CanvasContext);
+  const { data } = useContext(DataContext);
+  const { enqueueSnackbar } = useSnackbar();
+  const { setDataModalOpen, setChartModalOpen } = prop;
   return (
     <ButtonGroup
       sx={{
@@ -34,7 +40,17 @@ export function OperateButtonGroup(prop: {
         variant="contained"
         color="info"
         startIcon={<ChangeCircleOutlined />}
-        onClick={() => setModalOpen(true)}
+        onClick={() => {
+          if (data === null) {
+            enqueueSnackbar({
+              message: "请先选择文件！",
+              variant: "warning",
+              anchorOrigin: lb,
+            });
+            return;
+          }
+          setDataModalOpen(true);
+        }}
       >
         字段修改
       </Button>
@@ -43,7 +59,7 @@ export function OperateButtonGroup(prop: {
         color="primary"
         startIcon={<OutputOutlined />}
         onClick={() => {
-          if (prop.svgRef.current) outputSVG(prop.svgRef.current);
+          if (svgRef && svgRef.current) outputSVG(svgRef.current);
         }}
       >
         导出SVG
@@ -63,10 +79,15 @@ export function OperateButtonGroup(prop: {
         color="error"
         startIcon={<AddchartRounded />}
         onClick={() => {
-          if (prop.rootGroundRef.current) {
-            let arc = new ArcChart(50, 50, 20);
-            arc.generateNode(prop.rootGroundRef.current);
+          if (data === null) {
+            enqueueSnackbar({
+              message: "请先选择文件！",
+              variant: "warning",
+              anchorOrigin: lb,
+            });
+            return;
           }
+          setChartModalOpen(true);
         }}
       >
         生成图表
@@ -76,7 +97,7 @@ export function OperateButtonGroup(prop: {
         color="primary"
         startIcon={<AddAPhotoOutlined />}
         onClick={() => {
-          if (prop.svgRef.current) outputPNG(prop.svgRef.current);
+          if (svgRef && svgRef.current) outputPNG(svgRef.current);
         }}
       >
         导出PNG
@@ -86,9 +107,14 @@ export function OperateButtonGroup(prop: {
         color="warning"
         startIcon={<RestartAltOutlined />}
         onClick={() => {
-          if (prop.svgRef.current && prop.rootGroundRef.current) {
+          if (
+            svgRef &&
+            rootGroupRef &&
+            svgRef.current &&
+            rootGroupRef.current
+          ) {
             ChartController.removeInstance();
-            prop.rootGroundRef.current.innerHTML = "";
+            rootGroupRef.current.innerHTML = "";
           }
         }}
       >

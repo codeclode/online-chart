@@ -7,28 +7,35 @@ import {
   Chip,
   ButtonGroup,
   Button,
+  Box,
 } from "@mui/material";
-import { DSVRowArray } from "d3";
-import { Dispatch, SetStateAction, useState, useEffect } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useState,
+  useEffect,
+  useContext,
+} from "react";
 import {
   DataTypeString,
   DataTypeStringArray,
   dataTypeColor,
 } from "~/pages/utils/const/dataWorkers";
 import { modalSX } from "~/pages/utils/types/const";
+import { DataContext } from "~/pages/workSpace";
+import { useSnackbar } from "notistack";
+import { lb } from "~/pages/utils/const/anchorOrigin";
 
 export function DataModal(prop: {
   setModalOpen: Dispatch<SetStateAction<boolean>>;
   modalOpen: boolean;
-  setData: Dispatch<SetStateAction<DSVRowArray<string> | null>>;
-  data: DSVRowArray<string> | null;
-  setDataTypes: Dispatch<SetStateAction<DataTypeString[] | null>>;
-  dataTypes: DataTypeString[] | null;
 }) {
+  const { enqueueSnackbar } = useSnackbar();
+  const { dataTypes, data, setData, setDataTypes } = useContext(DataContext);
   const [tempTypes, setTempTypes] = useState<DataTypeString[]>([]);
   useEffect(() => {
-    if (prop.dataTypes) setTempTypes([...prop.dataTypes]);
-  }, [prop.dataTypes]);
+    if (dataTypes) setTempTypes([...dataTypes]);
+  }, [dataTypes]);
   return (
     <Modal
       closeAfterTransition
@@ -44,16 +51,17 @@ export function DataModal(prop: {
       }}
     >
       <Fade in={prop.modalOpen}>
-        <Stack alignItems="center" sx={modalSX}>
+        <Stack gap={1} alignItems="center" sx={modalSX}>
           <Typography variant="h4" component="h2">
             字段属性
           </Typography>
           <Typography variant="caption">点击切换</Typography>
-          <div style={{ width: "75%" }}>
-            {prop.data && prop.dataTypes
-              ? prop.data.columns.map((v, i) => {
+          <Box sx={{ width: "75%", maxHeight: "30vh", overflow: "auto" }}>
+            {data && dataTypes
+              ? data.columns.map((v, i) => {
                   return (
                     <Stack
+                      key={v}
                       alignItems="center"
                       mb={1}
                       justifyContent="space-between"
@@ -83,9 +91,28 @@ export function DataModal(prop: {
                   );
                 })
               : null}
-          </div>
+          </Box>
           <ButtonGroup>
             <Button
+              color="info"
+              variant="contained"
+              onClick={() => {
+                if (!setDataTypes) {
+                  enqueueSnackbar({
+                    message: "服务繁忙，请稍后",
+                    variant: "warning",
+                    anchorOrigin: lb,
+                  });
+                  return;
+                }
+                setDataTypes(tempTypes);
+                prop.setModalOpen(false);
+              }}
+            >
+              确认
+            </Button>
+            <Button
+              variant="contained"
               onClick={() => {
                 prop.setModalOpen(false);
               }}
