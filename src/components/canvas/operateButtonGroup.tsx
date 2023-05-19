@@ -12,9 +12,8 @@ import { useSnackbar } from "notistack";
 import { MutableRefObject, Dispatch, SetStateAction, useContext } from "react";
 import { lb } from "~/pages/utils/const/anchorOrigin";
 import { DataContext } from "~/pages/workSpace";
-import { ArcChart } from "~/utils/charts/generator/Arc";
 import { ChartController } from "~/utils/charts/generator/Controller";
-import { outputSVG, outputPNG } from "~/utils/outputImg";
+import { outputSVG, outputPNG } from "~/pages/utils/outputImg";
 import { CanvasContext } from "../canvas";
 
 export function OperateButtonGroup(prop: {

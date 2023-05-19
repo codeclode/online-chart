@@ -17,6 +17,7 @@ const placements: [number, number][] = [
 const helperCircleRadius = 1;
 const gap = 1;
 const rectLineWidth = 0.5;
+const baseStrokeWidth = 50;
 export class ChartController {
   target: Chart;
   parent: SVGElement;
@@ -63,9 +64,9 @@ export class ChartController {
         `translate(${event.x},${event.y})`
       );
     }
-
-    let height = this.target.baseHeight + 2 * gap;
-    let width = this.target.baseWidth + 2 * gap;
+    let strokeWidthScale = this.target.baseWidth / 50;
+    let height = this.target.baseHeight + 2 * strokeWidthScale;
+    let width = this.target.baseWidth + 2 * strokeWidthScale;
     let { x, y, scaleX, scaleY, rotation } = this.target;
 
     let g = createSVGElement("g");
@@ -77,11 +78,11 @@ export class ChartController {
       )
       .append("rect")
       .attr("class", "controllerRect")
-      .attr("x", -gap)
-      .attr("y", -gap)
+      .attr("x", -gap * strokeWidthScale)
+      .attr("y", -gap * strokeWidthScale)
       .attr("height", height)
       .attr("width", width)
-      .attr("stroke-width", rectLineWidth)
+      .attr("stroke-width", rectLineWidth * strokeWidthScale)
       .attr("fill", "transparent")
       .attr("stroke", "#6cf");
     // .call(
@@ -100,10 +101,10 @@ export class ChartController {
       .enter()
       .append("circle")
       .attr("class", "helper")
-      .attr("cx", (d) => d[0] * width - gap)
-      .attr("cy", (d) => d[1] * height - gap)
-      .attr("r", helperCircleRadius)
-      .attr("stroke-width", "0.2")
+      .attr("cx", (d) => d[0] * width - gap * strokeWidthScale)
+      .attr("cy", (d) => d[1] * height - gap * strokeWidthScale)
+      .attr("r", helperCircleRadius * strokeWidthScale)
+      .attr("stroke-width", 0.2 * strokeWidthScale)
       .attr("stroke", "blue")
       .attr("fill", "white");
     return g;

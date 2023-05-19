@@ -25,6 +25,7 @@ import { ct } from "~/pages/utils/const/anchorOrigin";
 import { ArcChart } from "./Arc";
 
 import * as schemes from "d3-scale-chromatic";
+import { DataContext } from "~/pages/workSpace";
 
 export function createSVGElement<T extends keyof SVGElementTagNameMap>(
   nodeType: T
@@ -127,14 +128,53 @@ function ColorSelecter(prop: {
   );
 }
 
-type ChartDetailComponent = (prop: {
+function DataSelecter(prop: {
+  value: string;
+  onChange: Dispatch<SetStateAction<string>>;
+  id: string;
+}) {
+  const { value, onChange, id } = prop;
+  const { data, dataTypes } = useContext(DataContext);
+  return (
+    <FormControl color="info">
+      <InputLabel htmlFor={`data-selecter-${id}`}>{`字段${id}`}</InputLabel>
+      <Select
+        value={value}
+        onChange={(e: SelectChangeEvent<string>) => {
+          onChange(e.target.value);
+        }}
+        id={`data-selecter-${id}`}
+        label={`字段${id}`}
+      >
+        {data
+          ? data.columns.map((v, i) => {
+              return (
+                <MenuItem key={v} value={v}>
+                  {v}
+                </MenuItem>
+              );
+            })
+          : null}
+      </Select>
+    </FormControl>
+  );
+}
+
+export type ChartDetailComponent = (prop: {
   confirm: boolean;
   setModalClose: () => void;
 }) => JSX.Element;
 
 const BOXDetail: ChartDetailComponent = function (prop) {
   const { confirm, setModalClose } = prop;
+  const [confirmed, setConfirmed] = useState<boolean>(false);
+  const { svgRef, rootGroupRef } = useContext(CanvasContext);
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
+    if (!confirmed) {
+      setConfirmed(true);
+      return;
+    }
     setModalClose();
   }, [confirm]);
   return <></>;
@@ -144,15 +184,21 @@ const PIEDetail: ChartDetailComponent = function (prop) {
   const { confirm, setModalClose } = prop;
   const [confirmed, setConfirmed] = useState<boolean>(false);
   const { svgRef, rootGroupRef } = useContext(CanvasContext);
+  const { dataTypes, data } = useContext(DataContext);
   const { enqueueSnackbar } = useSnackbar();
   const [innerRadius, setInnerRadius] = useState<number>(10);
   const [outerRadius, setOuterRadius] = useState<number>(20);
+  const [dataCloumn, setDataColumn] = useState<string>("");
   const [color, setColor] = useState<string>("interpolateTurbo");
-  const validator = useCallback((innerRadius: number, outerRadius: number) => {
-    if (innerRadius < 0 || outerRadius <= 0) return false;
-    if (innerRadius >= outerRadius) return false;
-    return true;
-  }, []);
+  const validator = useCallback(
+    (innerRadius: number, outerRadius: number) => {
+      if (innerRadius < 0 || outerRadius <= 0) return false;
+      if (innerRadius >= outerRadius) return false;
+      if (data == null || !data.columns.includes(dataCloumn)) return false;
+      return true;
+    },
+    [dataCloumn, data]
+  );
   useEffect(() => {
     if (!confirmed) {
       setConfirmed(true);
@@ -166,13 +212,33 @@ const PIEDetail: ChartDetailComponent = function (prop) {
       });
       return;
     }
+    if (!data || !dataTypes) {
+      enqueueSnackbar({
+        message: "数据加载失败",
+        variant: "error",
+        anchorOrigin: ct,
+      });
+      return;
+    }
+    let m = new Map<string, number>();
+    data.forEach((v) => {
+      let value = v[dataCloumn];
+
+      if (value !== undefined)
+        if (m.has(value)) {
+          m.set(value, (m.get(value) as number) + 1);
+        } else {
+          m.set(value, 1);
+        }
+    });
     if (svgNotNull(svgRef) && rootNotNull(rootGroupRef)) {
       let arc = new ArcChart(
         innerRadius,
         outerRadius,
         svgRef.current,
         rootGroupRef.current,
-        color as keyof typeof schemes
+        color as keyof typeof schemes,
+        m
       );
       arc.generateNode(rootGroupRef.current);
     }
@@ -203,47 +269,95 @@ const PIEDetail: ChartDetailComponent = function (prop) {
         }}
       ></TextField>
       <ColorSelecter color={color} onChange={setColor}></ColorSelecter>
+      <DataSelecter
+        value={dataCloumn}
+        onChange={setDataColumn}
+        id={"1"}
+      ></DataSelecter>
     </>
   );
 };
+
 const PATHDetail: ChartDetailComponent = function (prop) {
   const { confirm, setModalClose } = prop;
+  const [confirmed, setConfirmed] = useState<boolean>(false);
+  const { svgRef, rootGroupRef } = useContext(CanvasContext);
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
+    if (!confirmed) {
+      setConfirmed(true);
+      return;
+    }
     setModalClose();
   }, [confirm]);
   return <></>;
 };
 const TREEDetail: ChartDetailComponent = function (prop) {
   const { confirm, setModalClose } = prop;
+  const [confirmed, setConfirmed] = useState<boolean>(false);
+  const { svgRef, rootGroupRef } = useContext(CanvasContext);
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
+    if (!confirmed) {
+      setConfirmed(true);
+      return;
+    }
     setModalClose();
   }, [confirm]);
   return <></>;
 };
 const SCATTERDetail: ChartDetailComponent = function (prop) {
   const { confirm, setModalClose } = prop;
+  const [confirmed, setConfirmed] = useState<boolean>(false);
+  const { svgRef, rootGroupRef } = useContext(CanvasContext);
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
+    if (!confirmed) {
+      setConfirmed(true);
+      return;
+    }
     setModalClose();
   }, [confirm]);
   return <></>;
 };
 const LINEDetail: ChartDetailComponent = function (prop) {
   const { confirm, setModalClose } = prop;
+  const [confirmed, setConfirmed] = useState<boolean>(false);
+  const { svgRef, rootGroupRef } = useContext(CanvasContext);
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
+    if (!confirmed) {
+      setConfirmed(true);
+      return;
+    }
     setModalClose();
   }, [confirm]);
   return <></>;
 };
 const MAPDetail: ChartDetailComponent = function (prop) {
   const { confirm, setModalClose } = prop;
+  const [confirmed, setConfirmed] = useState<boolean>(false);
+  const { svgRef, rootGroupRef } = useContext(CanvasContext);
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
+    if (!confirmed) {
+      setConfirmed(true);
+      return;
+    }
     setModalClose();
   }, [confirm]);
   return <></>;
 };
 const RADARDetail: ChartDetailComponent = function (prop) {
   const { confirm, setModalClose } = prop;
+  const [confirmed, setConfirmed] = useState<boolean>(false);
+  const { svgRef, rootGroupRef } = useContext(CanvasContext);
+  const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
+    if (!confirmed) {
+      setConfirmed(true);
+      return;
+    }
     setModalClose();
   }, [confirm]);
   return <></>;

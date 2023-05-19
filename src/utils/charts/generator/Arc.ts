@@ -16,12 +16,14 @@ import * as schemes from "d3-scale-chromatic";
 export class ArcChart extends Chart {
   innerRadius: number;
   outerRadius: number;
+  data: Map<string, number>;
   constructor(
     innerRadius: number,
     outerRadius: number,
     svg: SVGSVGElement,
     root: SVGGElement,
-    colorSet: keyof typeof schemes
+    colorSet: keyof typeof schemes,
+    data: Map<string, number>
   ) {
     const { centerX, centerY } = Chart.getCenter(
       svg,
@@ -32,6 +34,7 @@ export class ArcChart extends Chart {
     super(centerX, centerY, 2 * outerRadius, 2 * outerRadius, colorSet);
     this.innerRadius = innerRadius;
     this.outerRadius = outerRadius;
+    this.data = data;
   }
 
   generateNode(parent: SVGElement) {
@@ -39,19 +42,24 @@ export class ArcChart extends Chart {
     const newArc = arc();
 
     const pieFn = pie().padAngle(0);
-    let data = [10, 11, 22, 30, 50, 80, 130];
-    let normalizer = normalize(data);
-    let arcs = pieFn(data);
 
-    select(node)
+    let v = Array.from(this.data.values());
+    let k = Array.from(this.data.keys());
+    let normalizer = normalize(v);
+    let arcs = pieFn(v);
+
+    let innerG = select(node)
       .attr("transform", `translate(${this.x},${this.y})`)
       .attr("class", "chartContainer")
       .append("g")
-      .attr("transform", `translate(${this.outerRadius},${this.outerRadius})`)
-      .selectAll("path")
+      .attr("transform", `translate(${this.outerRadius},${this.outerRadius})`);
+
+    innerG
+      .selectAll(".arc")
       .data(arcs)
       .enter()
       .append("path")
+      .attr("class", "arc")
       .attr("d", (d) =>
         newArc({
           startAngle: d.startAngle,
@@ -64,6 +72,29 @@ export class ArcChart extends Chart {
         return getColor(this.colorSet, d.index, normalizer(d.value));
       });
 
+    innerG
+      .selectAll(".label")
+      .data(arcs)
+      .enter()
+      .append("text")
+      .text((d) => {
+        return k[d.index] || "";
+      })
+      .attr("class", "label")
+      .attr("fill", (d) => {
+        return getColor(this.colorSet, d.index + 5, 1 - normalizer(d.value));
+      })
+      .attr("text-anchor", "middle")
+      .attr("font-size", (this.outerRadius - this.innerRadius) / 3)
+      .attr("transform", (d) => {
+        let [x, y] = newArc.centroid({
+          startAngle: d.startAngle,
+          endAngle: d.endAngle,
+          innerRadius: this.innerRadius,
+          outerRadius: this.outerRadius,
+        });
+        return `translate(${x},${y})`;
+      });
     node.addEventListener("click", (e: MouseEvent) => {
       new ChartController(this, parent);
       e.stopPropagation();
