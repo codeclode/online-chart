@@ -2,7 +2,8 @@ import { Dispatch, SetStateAction } from "react";
 import { ChartController } from "./Controller";
 
 import * as schemes from "d3-scale-chromatic";
-export abstract class Chart {
+import { DataType } from "~/pages/utils/const/dataWorkers";
+export abstract class Chart<T extends Map<string, DataType> | DataType> {
   x: number;
   y: number;
   scaleX: number;
@@ -14,12 +15,16 @@ export abstract class Chart {
   node: SVGElement | null = null;
   controller: ChartController | null = null;
   colorSet: keyof typeof schemes;
+  colorMap: Map<string, string>;
+  data: Map<string, T>;
+  abstract columns: string[];
   constructor(
     x: number,
     y: number,
     width: number,
     height: number,
-    colorSet: keyof typeof schemes
+    colorSet: keyof typeof schemes,
+    data: Map<string, T>
   ) {
     this.x = x;
     this.y = y;
@@ -29,6 +34,8 @@ export abstract class Chart {
     this.scaleY = 1;
     this.rotation = 0;
     this.colorSet = colorSet;
+    this.data = data;
+    this.colorMap = new Map();
   }
 
   static getCenter(

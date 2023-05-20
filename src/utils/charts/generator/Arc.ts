@@ -1,29 +1,22 @@
-import {
-  arc,
-  extent,
-  interpolateTurbo,
-  pie,
-  schemeCategory10,
-  select,
-} from "d3";
-import { Dispatch, SetStateAction } from "react";
+import { arc, pie, select } from "d3";
 import { normalize } from "../number/util";
 import { Chart } from "./Chart";
 import { ChartController } from "./Controller";
-import { colorCategorical, createSVGElement, getColor } from "./util";
+import { createSVGElement, getColor } from "./util";
 import * as schemes from "d3-scale-chromatic";
 
-export class ArcChart extends Chart {
+export class ArcChart extends Chart<number> {
   innerRadius: number;
   outerRadius: number;
-  data: Map<string, number>;
+  columns: string[];
   constructor(
     innerRadius: number,
     outerRadius: number,
     svg: SVGSVGElement,
     root: SVGGElement,
     colorSet: keyof typeof schemes,
-    data: Map<string, number>
+    data: Map<string, number>,
+    dataCloumns: string[]
   ) {
     const { centerX, centerY } = Chart.getCenter(
       svg,
@@ -31,10 +24,10 @@ export class ArcChart extends Chart {
       2 * outerRadius,
       2 * outerRadius
     );
-    super(centerX, centerY, 2 * outerRadius, 2 * outerRadius, colorSet);
+    super(centerX, centerY, 2 * outerRadius, 2 * outerRadius, colorSet, data);
     this.innerRadius = innerRadius;
     this.outerRadius = outerRadius;
-    this.data = data;
+    this.columns = dataCloumns;
   }
 
   generateNode(parent: SVGElement) {
@@ -47,7 +40,6 @@ export class ArcChart extends Chart {
     let k = Array.from(this.data.keys());
     let normalizer = normalize(v);
     let arcs = pieFn(v);
-
     let innerG = select(node)
       .attr("transform", `translate(${this.x},${this.y})`)
       .attr("class", "chartContainer")
@@ -69,6 +61,10 @@ export class ArcChart extends Chart {
         })
       )
       .attr("fill", (d) => {
+        console.log(normalizer(d.value));
+
+        let color = getColor(this.colorSet, d.index, normalizer(d.value));
+        this.colorMap.set(k[d.index] as string, color);
         return getColor(this.colorSet, d.index, normalizer(d.value));
       });
 

@@ -238,7 +238,8 @@ const PIEDetail: ChartDetailComponent = function (prop) {
         svgRef.current,
         rootGroupRef.current,
         color as keyof typeof schemes,
-        m
+        m,
+        [dataCloumn, "Count"]
       );
       arc.generateNode(rootGroupRef.current);
     }

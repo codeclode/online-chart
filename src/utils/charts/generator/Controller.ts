@@ -1,5 +1,6 @@
 import { D3DragEvent, drag, select, selectAll } from "d3";
 import { Dispatch, SetStateAction } from "react";
+import { DataType } from "~/pages/utils/const/dataWorkers";
 import { Chart } from "./Chart";
 import { createSVGElement } from "./util";
 const placements: [number, number][] = [
@@ -19,19 +20,21 @@ const gap = 1;
 const rectLineWidth = 0.5;
 const baseStrokeWidth = 50;
 export class ChartController {
-  target: Chart;
+  target: Chart<Map<string, DataType> | DataType>;
   parent: SVGElement;
   node: SVGGElement;
   static instance: ChartController | null = null;
   static setReactInstance: Dispatch<SetStateAction<ChartController | null>>;
-  constructor(chart: Chart, parent: SVGElement) {
+  constructor(
+    chart: Chart<Map<string, DataType> | DataType>,
+    parent: SVGElement
+  ) {
     ChartController.removeInstance();
     this.target = chart;
     this.parent = parent;
     this.target.bindController(this);
     this.node = this.generateNode();
     parent.appendChild(this.node);
-    console.log(parent);
 
     this.setOrigin(this.target.origin);
     ChartController.instance = this;

@@ -9,10 +9,16 @@ import {
   TextField,
   Button,
   Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
 } from "@mui/material";
 import { blue } from "@mui/material/colors";
 import { useState, useEffect, ChangeEvent, MouseEvent } from "react";
 import { ChartController } from "~/utils/charts/generator/Controller";
+import { getColor } from "~/utils/charts/generator/util";
 
 const origins: {
   name: string;
@@ -99,6 +105,65 @@ function TransformOriginControl(prop: { chartController: ChartController }) {
       {originChoice(1)}
       {originChoice(2)}
     </Stack>
+  );
+}
+
+function ChartDataInfo(prop: { chartController: ChartController }) {
+  const { chartController } = prop;
+  const chart = chartController.target;
+  const [searchKeyWord, setSearchKeyWord] = useState<string>("");
+  const data = chartController.target.data;
+  return (
+    <TableContainer sx={{ width: "95%" }}>
+      <Table size="small" stickyHeader>
+        <TableHead>
+          <TableRow>
+            <TableCell align="center" colSpan={chart.columns.length + 1}>
+              <TextField
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setSearchKeyWord(e.target.value);
+                }}
+                value={searchKeyWord}
+                size="small"
+                color="info"
+                label="search"
+              ></TextField>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            {chart.columns.map((v) => {
+              return (
+                <TableCell key={v} align="center">
+                  {v}
+                </TableCell>
+              );
+            })}
+            <TableCell align="center">color</TableCell>
+          </TableRow>
+          {[...data.keys()]
+            .filter((v) => {
+              return searchKeyWord === "" || v.includes(searchKeyWord);
+            })
+            .map((k, i) => {
+              const d = data.get(k);
+              return typeof d === "object" ? null : (
+                <TableRow key={k}>
+                  <TableCell align="center">{k}</TableCell>
+                  <TableCell align="center">{d}</TableCell>
+                  <TableCell
+                    align="center"
+                    padding="checkbox"
+                    sx={{
+                      backgroundColor: chart.colorMap.get(k),
+                      backgroundClip: "content-box",
+                    }}
+                  ></TableCell>
+                </TableRow>
+              );
+            })}
+        </TableHead>
+      </Table>
+    </TableContainer>
   );
 }
 
@@ -211,7 +276,9 @@ export function ChartSetting(prop: { chartController: ChartController }) {
             ></TransformOriginControl>
           </Stack>
         </TabPanel>
-        <TabPanel value="2">信息</TabPanel>
+        <TabPanel sx={{ width: "100%", m: 0, p: 0 }} value="2">
+          <ChartDataInfo chartController={chartController}></ChartDataInfo>
+        </TabPanel>
         <TabPanel sx={{ width: "95%", m: 0, p: 0 }} value="3">
           <Button
             variant="contained"

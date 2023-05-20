@@ -21,7 +21,7 @@ web前端svg+d3+trpc图表生成
 
 - BS
 - 主要工作在B端，S只负责记录用户的预设颜色和鉴权
-- 技术选型，trpc+mongodb+prisma
+- 技术选型，next+trpc+mongodb+prisma
 
 ### B
 
@@ -29,7 +29,7 @@ web前端svg+d3+trpc图表生成
 - 画布信息的发布订阅——黑板
 - 整体内容分层，prop传递信息
 - 不同类型的BoxChart、ArcChart等继承自Chart抽象类（面向对象系统）
-- 图形控件Controller与选中的Chart双向绑定（我不知道是什么）
+- 图形控件类Controller的唯一实例（单例模式）与选中的Chart双向绑定（我不知道是什么）
 
 ### S
 
