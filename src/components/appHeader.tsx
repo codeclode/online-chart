@@ -31,12 +31,14 @@ import {
   BookOutlined,
   ContactsOutlined,
 } from "@mui/icons-material";
-import { loginPath } from "~/pages/utils/const/routers";
+import { colorSettings, loginPath } from "~/pages/utils/const/routers";
 import { authorColor, bookColor } from "~/pages/utils/const/color";
+import { useRouter } from "next/router";
 export const AppHeader = forwardRef(function (
   _props,
   ref: ForwardedRef<HTMLDivElement | null>
 ) {
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const [anchorAvatar, setAnchorAvatar] = useState<null | HTMLElement>(null);
@@ -124,7 +126,12 @@ export const AppHeader = forwardRef(function (
             个人图表
           </MenuItem>
           <Divider></Divider>
-          <MenuItem>
+          <MenuItem
+            onClick={() => {
+              console.log(123);
+              router.push(colorSettings);
+            }}
+          >
             <ListItemIcon>
               <Settings fontSize="small" />
             </ListItemIcon>

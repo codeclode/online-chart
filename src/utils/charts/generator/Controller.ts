@@ -129,7 +129,8 @@ export class ChartController {
     } else if (v === "bottom") {
       vx = 1;
     }
-    let start = helperCircleRadius * 2;
+    let strokeWidthScale = this.target.baseWidth / 50;
+    let start = helperCircleRadius * strokeWidthScale * 2;
     let width = this.target.baseWidth;
     let height = this.target.baseHeight;
     let cx = start + hx * width,
