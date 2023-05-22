@@ -47,3 +47,33 @@
   cursor: grabbing;
   fill: #6cf;
 }
+
+@keyframes gradientInFocus {
+  from {
+    stroke-dashoffset: 0;
+  }
+
+  to {
+    stroke-dashoffset: 2;
+  }
+}
+
+.gradientController {
+  animation: gradientInFocus 1s linear infinite;
+}
+
+@keyframes dispersedInFocus {
+  from {
+    outline-color: #f6c
+  }
+
+  to {
+    outline-color: #6cf
+  }
+}
+
+.dispersedController {
+  outline: 4px black dotted;
+  z-index: 1;
+  animation: dispersedInFocus 1s linear infinite alternate;
+}
