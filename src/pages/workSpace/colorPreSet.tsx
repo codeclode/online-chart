@@ -1,4 +1,5 @@
 import {
+  AddRounded,
   BeachAccessRounded,
   BlurLinearRounded,
   ImageSearchRounded,
@@ -7,7 +8,9 @@ import {
 } from "@mui/icons-material";
 import {
   Avatar,
+  Button,
   Grid,
+  IconButton,
   List,
   ListItem,
   ListItemAvatar,
@@ -16,6 +19,7 @@ import {
   ListItemText,
   Switch,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import { blue, green, red } from "@mui/material/colors";
 import { Box, Stack } from "@mui/system";
@@ -98,18 +102,29 @@ export default function ColorPreSetting() {
                   }}
                 >
                   <ListItemIcon>
-                    <SearchRounded></SearchRounded>
+                    <Tooltip arrow title="add ColorSet">
+                      <AddRounded
+                        sx={{
+                          borderRadius: "50%",
+                          color: "white",
+                          cursor: "pointer",
+                          background: "#66ccff content-box",
+                        }}
+                      />
+                    </Tooltip>
                   </ListItemIcon>
                   <ListItemText>
-                    <TextField
-                      size="small"
-                      color="info"
-                      label="search"
-                      value={searchKey}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        setSearchKey(e.target.value);
-                      }}
-                    ></TextField>
+                    <Stack direction="row">
+                      <TextField
+                        size="small"
+                        color="info"
+                        label="search"
+                        value={searchKey}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                          setSearchKey(e.target.value);
+                        }}
+                      ></TextField>
+                    </Stack>
                   </ListItemText>
                 </ListItem>
                 {new Array(20).fill(1).map((v, i) => {
@@ -125,7 +140,11 @@ export default function ColorPreSetting() {
               </List>
             </Grid>
             <Grid overflow="auto" height="100%" item xs>
-              <DispersedPicker></DispersedPicker>
+              {isGradient ? (
+                <GradientPicker></GradientPicker>
+              ) : (
+                <DispersedPicker></DispersedPicker>
+              )}
             </Grid>
           </Grid>
         </Box>

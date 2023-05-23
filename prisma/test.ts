@@ -1,4 +1,4 @@
-import { ChartType, PrismaClient } from "@prisma/client";
+import { PrismaClient, ColorPreSet } from "@prisma/client";
 
 const prisma = new PrismaClient();
 

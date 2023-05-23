@@ -21,10 +21,12 @@ enum ChartType {
   TREE
 }
 
-type ChartPreSet {
-  colors String[]
-  type   ChartType
-  tag    Boolean
+model ColorPreSet {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  owner     User     @relation(fields: [id], references: [id])
+  name      String
+  colors    String[]
+  positions Int[]
 }
 
 model Chart {
@@ -39,5 +41,5 @@ model User {
   username String        @unique
   password String
   charts   Chart[]
-  preset   ChartPreSet[]
+  preset   ColorPreSet[]
 }
