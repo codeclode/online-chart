@@ -12,6 +12,8 @@ import {
   useEffect,
   useState,
 } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import { TokenOverTimeERROR } from "~/server/utils/const/errors";
 import { setHeaderToken, trpc } from "../utils/trpc";
 import "./styles/index.global.css";
@@ -74,7 +76,9 @@ const MyApp: AppType = ({ Component, pageProps }: AppProps) => {
     <TokenContext.Provider value={{ token, setToken, refreshToken }}>
       <ThemeProvider theme={theme}>
         <SnackbarProvider maxSnack={3}>
-          <Component {...pageProps} />
+          <DndProvider backend={HTML5Backend}>
+            <Component {...pageProps} />
+          </DndProvider>
         </SnackbarProvider>
       </ThemeProvider>
     </TokenContext.Provider>

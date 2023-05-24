@@ -14,6 +14,7 @@ import {
 import { Box, Container } from "@mui/system";
 import { rgb } from "d3";
 import { ChangeEvent, useCallback, useState } from "react";
+import { trpc } from "~/utils/trpc";
 
 function SliderColor(prop: {
   onChange: (v: number) => void;
@@ -50,6 +51,7 @@ function SliderColor(prop: {
 }
 
 export function DispersedPicker() {
+  const trpcContext = trpc.useContext();
   const [colors, setColors] = useState<string[]>([
     "#66ccff",
     "#139268",
@@ -127,9 +129,21 @@ export function DispersedPicker() {
             <AddRounded fontSize="large"></AddRounded>
           </IconButton>
         </Grid>
-        <Grid pt={5} xs={12}>
+        <Grid item pt={5} xs={12}>
           <Box display="flex" justifyContent="center">
-            <Button variant="contained" color="success">
+            <Button
+              onClick={async () => {
+                let retColors =
+                  await trpcContext.client.user.addPresetColor.mutate({
+                    name: "myColor",
+                    colors: colors,
+                    positions: null,
+                  });
+                console.log(colors);
+              }}
+              variant="contained"
+              color="success"
+            >
               提交更改
             </Button>
           </Box>
@@ -155,6 +169,7 @@ export function DispersedPicker() {
           {Object.keys(color).map((k) => {
             return (
               <SliderColor
+                key={k}
                 label={k}
                 value={color[k as keyof typeof color]}
                 onChange={(v: number) => {

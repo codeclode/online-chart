@@ -62,6 +62,15 @@
   animation: gradientInFocus 1s linear infinite;
 }
 
+circle.gradientController {
+  cursor: grab;
+}
+
+circle.gradientController:active {
+  cursor: grabbing;
+}
+
+
 @keyframes dispersedInFocus {
   from {
     outline-color: #f6c

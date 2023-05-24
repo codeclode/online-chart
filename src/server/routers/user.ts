@@ -1,5 +1,5 @@
 import { router, publicProcedure, prisma } from "../trpc";
-import { string, z } from "zod";
+import { array, nullable, number, object, string, z } from "zod";
 import {
   PwdNotCorrectOrNoUserError,
   RepeatUserError,
@@ -98,4 +98,53 @@ export const userRouter = router({
       password: "1a5wa84r65ae4r89w",
     };
   }),
+  getColorPreSetByUserID: privateProduce.query(async ({ ctx }) => {
+    let user = await prisma.user.findFirst({
+      where: {
+        username: ctx.username,
+      },
+      include: {
+        preset: true,
+      },
+    });
+    if (!user) {
+      throw new PwdNotCorrectOrNoUserError();
+    }
+    return {
+      ...user,
+      password: "1a5wa84r65ae4r89w",
+    };
+  }),
+  addPresetColor: privateProduce
+    .input(
+      z.object({
+        name: string().max(10).min(1),
+        colors: array(string()),
+        positions: nullable(array(number())),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      let user = await prisma.user.findFirst({
+        where: {
+          username: ctx.username,
+        },
+      });
+      if (!user) {
+        throw new PwdNotCorrectOrNoUserError();
+      } else {
+        let colors = await prisma.colorPreSet.create({
+          data: {
+            name: input.name,
+            colors: input.colors,
+            positions: input.positions || [],
+            owner: {
+              connect: {
+                id: user.id,
+              },
+            },
+          },
+        });
+        return colors;
+      }
+    }),
 });

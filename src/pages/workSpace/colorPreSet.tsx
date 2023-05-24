@@ -23,15 +23,45 @@ import {
 } from "@mui/material";
 import { blue, green, red } from "@mui/material/colors";
 import { Box, Stack } from "@mui/system";
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { useSnackbar } from "notistack";
+import {
+  ChangeEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { AppHeader } from "~/components/appHeader";
 import { DispersedPicker } from "~/components/inputComponent/dispersedPicker";
 import { GradientPicker } from "~/components/inputComponent/gradientPicker";
+import { trpc } from "~/utils/trpc";
+import { ct } from "../utils/const/anchorOrigin";
+import { TokenContext } from "../_app";
 
 export default function ColorPreSetting() {
+  const trpcContext = trpc.useContext();
+  const [userInfo, setUserInfo] = useState();
+  const { enqueueSnackbar } = useSnackbar();
   const [isGradient, setIsGradient] = useState<boolean>(false);
   const [searchKey, setSearchKey] = useState<string>("");
   const [switchHeight, setSwitchHeight] = useState<number>(0);
+  const getColors = useCallback(async () => {
+    try {
+      const userInfo =
+        await trpcContext.client.user.getColorPreSetByUserID.query();
+      console.log(userInfo);
+    } catch (e) {
+      enqueueSnackbar({
+        message: "网络错误或尚未登录",
+        variant: "warning",
+        anchorOrigin: ct,
+      });
+    }
+  }, []);
+  useEffect(() => {
+    getColors();
+  }, []);
   const switchRef = useRef<HTMLLIElement | null>(null);
   useEffect(() => {
     if (switchRef.current) {

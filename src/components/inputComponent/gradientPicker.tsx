@@ -15,6 +15,7 @@ import {
   Fragment,
   MouseEvent,
   useCallback,
+  useRef,
   useState,
 } from "react";
 import { ct } from "~/pages/utils/const/anchorOrigin";
@@ -25,6 +26,8 @@ export type gradientStop = {
 };
 
 export function GradientPicker() {
+  const [isDraging, setIsDraging] = useState<boolean>(false);
+  const rectRef = useRef<SVGRectElement | null>(null);
   const [colorSet, setColorSet] = useState<gradientStop[]>([
     {
       color: "#66ccff",
@@ -44,13 +47,13 @@ export function GradientPicker() {
         ...colorSet.slice(currentIndex + 1),
       ]);
     },
-    [currentIndex]
+    [currentIndex, colorSet]
   );
   const { enqueueSnackbar } = useSnackbar();
   const dChangeColor = debounce(changeColor);
   const currentColor = colorSet[currentIndex];
   const addnewColor = function (p: number) {
-    let per = p * 100;
+    let per = Math.floor(p * 100);
     if (colorSet.map((v) => v.position).includes(p)) return;
     let newColor = {
       color: "#66ccff",
@@ -61,6 +64,31 @@ export function GradientPicker() {
     );
     setColorSet(newSet);
     setCurrentIndex(newSet.findIndex((v) => v === newColor));
+  };
+  const onMouseMove = (e: MouseEvent) => {
+    let rect = rectRef.current;
+    if (isDraging && rect) {
+      let { x, width } = rect.getBoundingClientRect();
+      let position = Math.floor(
+        Number(((e.clientX - x) / width).toExponential(2)) * 100
+      );
+      let color = currentColor;
+      if (!color) return;
+      let preColor = colorSet[currentIndex - 1];
+      if (preColor) {
+        if (preColor.position >= position) return;
+      }
+      let nextColor = colorSet[currentIndex + 1];
+      if (nextColor) {
+        if (nextColor.position <= position) return;
+      }
+      if (position < 0 || position > 100) return;
+      let newColor = {
+        color: color ? color.color : "#6cf",
+        position: position,
+      };
+      changeColor(newColor);
+    }
   };
   const changRGB = useCallback(
     (s: "r" | "g" | "b", number: number) => {
@@ -77,7 +105,14 @@ export function GradientPicker() {
   );
   return (
     <Stack alignItems="center">
-      <svg width="60%" viewBox="-20 0 140 40">
+      <svg
+        onMouseMove={onMouseMove}
+        onMouseUp={() => {
+          setIsDraging(false);
+        }}
+        width="60%"
+        viewBox="-20 0 140 40"
+      >
         <defs>
           <linearGradient id="gradient">
             {colorSet.map((v) => {
@@ -92,6 +127,7 @@ export function GradientPicker() {
           </linearGradient>
         </defs>
         <rect
+          ref={rectRef}
           onClick={(e: MouseEvent<SVGRectElement>) => {
             let { x, width } = e.currentTarget.getBoundingClientRect();
             addnewColor(Number(((e.clientX - x) / width).toFixed(2)));
@@ -105,30 +141,37 @@ export function GradientPicker() {
         {colorSet.map((v, i) => {
           return (
             <Fragment key={v.position}>
-              <circle
-                onClick={() => {
-                  setCurrentIndex(i);
-                }}
-                cx={v.position}
-                cy="5"
-                r="2"
-                stroke={i === currentIndex ? "black" : "gray"}
-                strokeDasharray={i === currentIndex ? "1 1" : ""}
-                strokeWidth={i === currentIndex ? "0.5" : "1"}
-                className={i === currentIndex ? "gradientController" : ""}
-                fill={v.color}
-              ></circle>
-              <line
-                fill="white"
-                x1={v.position}
-                x2={v.position}
-                y1="7"
-                y2="30"
-                stroke={i === currentIndex ? "black" : "gray"}
-                strokeDasharray={i === currentIndex ? "1 1" : ""}
-                strokeWidth={i === currentIndex ? "0.5" : "1"}
-                className={i === currentIndex ? "gradientController" : ""}
-              ></line>
+              <g>
+                <circle
+                  onMouseDown={() => {
+                    if (i === currentIndex) {
+                      setIsDraging(true);
+                    }
+                  }}
+                  onClick={() => {
+                    setCurrentIndex(i);
+                  }}
+                  cx={v.position}
+                  cy="5"
+                  r="2"
+                  stroke={i === currentIndex ? "black" : "gray"}
+                  strokeDasharray={i === currentIndex ? "1 1" : ""}
+                  strokeWidth={i === currentIndex ? "0.5" : "1"}
+                  className={i === currentIndex ? "gradientController" : ""}
+                  fill={v.color}
+                ></circle>
+                <line
+                  fill="white"
+                  x1={v.position}
+                  x2={v.position}
+                  y1="7"
+                  y2="30"
+                  stroke={i === currentIndex ? "black" : "gray"}
+                  strokeDasharray={i === currentIndex ? "1 1" : ""}
+                  strokeWidth={i === currentIndex ? "0.5" : "1"}
+                  className={i === currentIndex ? "gradientController" : ""}
+                ></line>
+              </g>
             </Fragment>
           );
         })}
@@ -168,7 +211,9 @@ export function GradientPicker() {
                 }
                 changeColor({ color: color.color, position: v as number });
               }}
-              value={colorSet[currentIndex]?.position}
+              value={
+                colorSet[currentIndex] ? colorSet[currentIndex]?.position : 0
+              }
               aria-label="Default"
               valueLabelDisplay="auto"
               color="secondary"
