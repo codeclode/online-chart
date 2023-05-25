@@ -1,9 +1,11 @@
+import { ColorizeRounded } from "@mui/icons-material";
 import {
   Button,
   ButtonGroup,
   debounce,
   FormControl,
   Grid,
+  IconButton,
   Slider,
   TextField,
 } from "@mui/material";
@@ -15,6 +17,7 @@ import {
   Fragment,
   MouseEvent,
   useCallback,
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -25,7 +28,7 @@ export type gradientStop = {
   color: string;
 };
 
-export function GradientPicker() {
+export function GradientPicker(prop: { curretID: string }) {
   const [isDraging, setIsDraging] = useState<boolean>(false);
   const rectRef = useRef<SVGRectElement | null>(null);
   const [colorSet, setColorSet] = useState<gradientStop[]>([
@@ -49,6 +52,9 @@ export function GradientPicker() {
     },
     [currentIndex, colorSet]
   );
+  useEffect(() => {
+    console.log(prop.curretID);
+  }, [prop.curretID]);
   const { enqueueSnackbar } = useSnackbar();
   const dChangeColor = debounce(changeColor);
   const currentColor = colorSet[currentIndex];
@@ -218,6 +224,28 @@ export function GradientPicker() {
               valueLabelDisplay="auto"
               color="secondary"
             ></Slider>
+            <IconButton
+              onClick={() => {
+                if ("EyeDropper" in window) {
+                  let example = new (window as any).EyeDropper()
+                    .open()
+                    .then((e: { sRGBHex: string }) => {
+                      changeColor({
+                        color: e.sRGBHex,
+                        position: currentColor ? currentColor.position : 0,
+                      });
+                    });
+                } else {
+                  enqueueSnackbar({
+                    message: "当前浏览器不支持试色~~",
+                    variant: "success",
+                    anchorOrigin: ct,
+                  });
+                }
+              }}
+            >
+              <ColorizeRounded />
+            </IconButton>
           </Stack>
         </Grid>
         <Grid item xs>

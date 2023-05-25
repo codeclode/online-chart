@@ -23,7 +23,8 @@ enum ChartType {
 
 model ColorPreSet {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  owner     User     @relation(fields: [id], references: [id])
+  owner     User     @relation(fields: [ownerID], references: [id])
+  ownerID   String   @db.ObjectId
   name      String
   colors    String[]
   positions Int[]

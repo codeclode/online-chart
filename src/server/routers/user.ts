@@ -1,6 +1,7 @@
 import { router, publicProcedure, prisma } from "../trpc";
 import { array, nullable, number, object, string, z } from "zod";
 import {
+  ColorNotFoundError,
   PwdNotCorrectOrNoUserError,
   RepeatUserError,
   TokenOverTimeERROR,
@@ -9,6 +10,7 @@ import { encrypt } from "~/utils/encrypt";
 import { makeSign, verifier } from "~/utils/tokenMaker";
 import { JsonWebTokenError, JwtPayload, TokenExpiredError } from "jsonwebtoken";
 import { privateProduce } from "../procedures/privateProduce";
+import { User } from "@prisma/client";
 export const userRouter = router({
   register: publicProcedure
     .input(
@@ -104,16 +106,31 @@ export const userRouter = router({
         username: ctx.username,
       },
       include: {
-        preset: true,
+        preset: {
+          select: {
+            name: true,
+            id: true,
+            positions: true,
+          },
+        },
       },
     });
     if (!user) {
       throw new PwdNotCorrectOrNoUserError();
     }
-    return {
+    let preset = user.preset.map((v) => {
+      return {
+        name: v.name,
+        id: v.id,
+        isGradient: v.positions.length !== 0,
+      };
+    });
+    let retUser = {
       ...user,
+      preset,
       password: "1a5wa84r65ae4r89w",
     };
+    return retUser;
   }),
   addPresetColor: privateProduce
     .input(
@@ -132,19 +149,31 @@ export const userRouter = router({
       if (!user) {
         throw new PwdNotCorrectOrNoUserError();
       } else {
-        let colors = await prisma.colorPreSet.create({
-          data: {
-            name: input.name,
-            colors: input.colors,
-            positions: input.positions || [],
-            owner: {
-              connect: {
-                id: user.id,
-              },
+        try {
+          let colors = await prisma.colorPreSet.create({
+            data: {
+              name: input.name,
+              colors: input.colors,
+              positions: input.positions || [],
+              ownerID: user.id,
             },
-          },
-        });
-        return colors;
+          });
+          return colors;
+        } catch (e) {
+          console.log(e);
+        }
       }
     }),
+  getColorByID: publicProcedure.input(string()).query(async ({ input }) => {
+    let colorSet = await prisma.colorPreSet.findFirst({
+      where: {
+        id: input,
+      },
+    });
+    if (colorSet) {
+      return colorSet;
+    } else {
+      throw new ColorNotFoundError();
+    }
+  }),
 });

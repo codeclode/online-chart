@@ -34,34 +34,47 @@ import {
 } from "react";
 import { AppHeader } from "~/components/appHeader";
 import { DispersedPicker } from "~/components/inputComponent/dispersedPicker";
-import { GradientPicker } from "~/components/inputComponent/gradientPicker";
-import { trpc } from "~/utils/trpc";
+import {
+  GradientPicker,
+  gradientStop,
+} from "~/components/inputComponent/gradientPicker";
+import { setHeaderToken, trpc } from "~/utils/trpc";
 import { ct } from "../utils/const/anchorOrigin";
 import { TokenContext } from "../_app";
 
 export default function ColorPreSetting() {
   const trpcContext = trpc.useContext();
-  const [userInfo, setUserInfo] = useState();
+  const [currentColorID, setCurrentColorID] = useState<string>("");
+  const tokenContext = useContext(TokenContext);
   const { enqueueSnackbar } = useSnackbar();
   const [isGradient, setIsGradient] = useState<boolean>(false);
   const [searchKey, setSearchKey] = useState<string>("");
   const [switchHeight, setSwitchHeight] = useState<number>(0);
+  const [colorSet, setColorSet] = useState<
+    { name: string; id: string; isGradient: boolean }[]
+  >([]);
   const getColors = useCallback(async () => {
     try {
-      const userInfo =
-        await trpcContext.client.user.getColorPreSetByUserID.query();
-      console.log(userInfo);
+      if (tokenContext.token !== "") {
+        setHeaderToken(tokenContext.token);
+        const userInfo =
+          await trpcContext.client.user.getColorPreSetByUserID.query();
+        console.log(userInfo);
+
+        setColorSet(userInfo.preset);
+      }
     } catch (e) {
+      console.log(e);
       enqueueSnackbar({
         message: "网络错误或尚未登录",
         variant: "warning",
         anchorOrigin: ct,
       });
     }
-  }, []);
+  }, [tokenContext.token]);
   useEffect(() => {
     getColors();
-  }, []);
+  }, [tokenContext.token]);
   const switchRef = useRef<HTMLLIElement | null>(null);
   useEffect(() => {
     if (switchRef.current) {
@@ -157,23 +170,36 @@ export default function ColorPreSetting() {
                     </Stack>
                   </ListItemText>
                 </ListItem>
-                {new Array(20).fill(1).map((v, i) => {
-                  return (
-                    <ListItemButton key={i}>
-                      <ListItemIcon>
-                        <ImageSearchRounded />
-                      </ListItemIcon>
-                      <ListItemText primary="Photos" secondary="Jan 9, 2014" />
-                    </ListItemButton>
-                  );
-                })}
+                {colorSet
+                  .filter((v) => {
+                    return (
+                      v.isGradient === isGradient &&
+                      (v.name.includes(searchKey.trim()) ||
+                        searchKey.trim() === "")
+                    );
+                  })
+                  .map((v) => {
+                    return (
+                      <ListItemButton
+                        onClick={() => {
+                          setCurrentColorID(v.id);
+                        }}
+                        key={v.id}
+                      >
+                        <ListItemIcon>
+                          <ImageSearchRounded />
+                        </ListItemIcon>
+                        <ListItemText primary={v.name} secondary={v.id} />
+                      </ListItemButton>
+                    );
+                  })}
               </List>
             </Grid>
             <Grid overflow="auto" height="100%" item xs>
               {isGradient ? (
-                <GradientPicker></GradientPicker>
+                <GradientPicker curretID={currentColorID}></GradientPicker>
               ) : (
-                <DispersedPicker></DispersedPicker>
+                <DispersedPicker curretID={currentColorID}></DispersedPicker>
               )}
             </Grid>
           </Grid>

@@ -38,3 +38,13 @@ export class CommenTokenOverTimeError extends TRPCError {
   }
   static messageString = "COMMEN_TOKEN_OVERTIME";
 }
+
+export class ColorNotFoundError extends TRPCError {
+  constructor() {
+    super({
+      message: ColorNotFoundError.messageString,
+      code: "NOT_FOUND",
+    });
+  }
+  static messageString = "COLOR_NOT_FOUND";
+}

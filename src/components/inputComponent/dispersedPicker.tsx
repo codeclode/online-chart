@@ -1,6 +1,5 @@
-import { AddRounded, ClearOutlined, DeleteRounded } from "@mui/icons-material";
+import { AddRounded, ColorizeRounded } from "@mui/icons-material";
 import {
-  Badge,
   Button,
   ButtonGroup,
   debounce,
@@ -11,9 +10,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Box, Container } from "@mui/system";
+import { Box } from "@mui/system";
 import { rgb } from "d3";
-import { ChangeEvent, useCallback, useState } from "react";
+import { enqueueSnackbar } from "notistack";
+import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { ct } from "~/pages/utils/const/anchorOrigin";
 import { trpc } from "~/utils/trpc";
 
 function SliderColor(prop: {
@@ -50,7 +51,7 @@ function SliderColor(prop: {
   );
 }
 
-export function DispersedPicker() {
+export function DispersedPicker(prop: { curretID: string }) {
   const trpcContext = trpc.useContext();
   const [colors, setColors] = useState<string[]>([
     "#66ccff",
@@ -76,6 +77,20 @@ export function DispersedPicker() {
     g: 0,
     b: 0,
   });
+  const getInitColor = useCallback(async () => {
+    let id = prop.curretID;
+    console.log(id);
+
+    if (id === "") {
+      return;
+    } else {
+      let colorSet = await trpcContext.client.user.getColorByID.query(id);
+      setColors(colorSet.colors);
+    }
+  }, [prop.curretID]);
+  useEffect(() => {
+    getInitColor();
+  }, [prop.curretID]);
   const dSetColor = debounce(useCallback(setColor, []));
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
   return (
@@ -188,6 +203,26 @@ export function DispersedPicker() {
             disabled
             value={rgb(color.r, color.g, color.b).formatHex()}
           ></TextField>
+          <IconButton
+            onClick={() => {
+              if ("EyeDropper" in window) {
+                let example = new (window as any).EyeDropper()
+                  .open()
+                  .then((e: { sRGBHex: string }) => {
+                    let newColor = rgb(e.sRGBHex);
+                    setColor({ r: newColor.r, g: newColor.g, b: newColor.b });
+                  });
+              } else {
+                enqueueSnackbar({
+                  message: "当前浏览器不支持试色~~",
+                  variant: "success",
+                  anchorOrigin: ct,
+                });
+              }
+            }}
+          >
+            <ColorizeRounded />
+          </IconButton>
           <Box
             width="40%"
             sx={{
