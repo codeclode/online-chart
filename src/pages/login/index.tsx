@@ -32,7 +32,7 @@ import {
   RestartAltOutlined,
   SvgIconComponent,
 } from "@mui/icons-material";
-import { trpc } from "~/utils/trpc";
+import { setHeaderToken, trpc } from "~/utils/trpc";
 import {
   PwdNotCorrectOrNoUserError,
   RepeatUserError,
@@ -256,7 +256,6 @@ function Registe() {
 
 function Login() {
   const router = useRouter();
-  console.log(router.query);
   const tokenProvider = useContext(TokenContext);
   const [userName, setUserName] = useState("");
   const [pwd, setPwd] = useState("");
@@ -291,6 +290,7 @@ function Login() {
         });
         localStorage.setItem("refreshToken", tokens.refreshToken);
         if (tokenProvider.setToken) {
+          setHeaderToken(tokens.token);
           tokenProvider.setToken(tokens.token);
           if (router.query["from"]) {
             router.push(router.query["from"].toString());
@@ -298,7 +298,6 @@ function Login() {
             router.push("/");
           }
         } else throw new Error();
-        setLoading(true);
       } catch (e: any) {
         if (
           typeof e === "object" &&
@@ -316,7 +315,7 @@ function Login() {
             open: true,
           });
         }
-        setLoading(true);
+        setLoading(false);
       }
     } else {
       setAlert({

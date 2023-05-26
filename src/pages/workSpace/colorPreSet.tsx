@@ -2,6 +2,9 @@ import {
   AddRounded,
   BeachAccessRounded,
   BlurLinearRounded,
+  ColorizeRounded,
+  ColorLensRounded,
+  GradientRounded,
   ImageSearchRounded,
   SearchRounded,
   WorkRounded,
@@ -17,6 +20,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Skeleton,
   Switch,
   TextField,
   Tooltip,
@@ -44,6 +48,7 @@ import { TokenContext } from "../_app";
 
 export default function ColorPreSetting() {
   const trpcContext = trpc.useContext();
+  const [loading, setLoading] = useState<boolean>(false);
   const [currentColorID, setCurrentColorID] = useState<string>("");
   const tokenContext = useContext(TokenContext);
   const { enqueueSnackbar } = useSnackbar();
@@ -55,21 +60,21 @@ export default function ColorPreSetting() {
   >([]);
   const getColors = useCallback(async () => {
     try {
+      setLoading(true);
       if (tokenContext.token !== "") {
         setHeaderToken(tokenContext.token);
         const userInfo =
           await trpcContext.client.user.getColorPreSetByUserID.query();
-        console.log(userInfo);
-
         setColorSet(userInfo.preset);
       }
     } catch (e) {
-      console.log(e);
       enqueueSnackbar({
-        message: "网络错误或尚未登录",
+        message: "网络错误或尚未登录，请刷新",
         variant: "warning",
         anchorOrigin: ct,
       });
+    } finally {
+      setLoading(false);
     }
   }, [tokenContext.token]);
   useEffect(() => {
@@ -83,6 +88,7 @@ export default function ColorPreSetting() {
   }, [switchHeight]);
   const changeGradient = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setIsGradient(event.target.checked);
+    setCurrentColorID("");
   }, []);
   return (
     <>
@@ -147,6 +153,9 @@ export default function ColorPreSetting() {
                   <ListItemIcon>
                     <Tooltip arrow title="add ColorSet">
                       <AddRounded
+                        onClick={() => {
+                          setCurrentColorID("");
+                        }}
                         sx={{
                           borderRadius: "50%",
                           color: "white",
@@ -170,36 +179,73 @@ export default function ColorPreSetting() {
                     </Stack>
                   </ListItemText>
                 </ListItem>
-                {colorSet
-                  .filter((v) => {
-                    return (
-                      v.isGradient === isGradient &&
-                      (v.name.includes(searchKey.trim()) ||
-                        searchKey.trim() === "")
-                    );
-                  })
-                  .map((v) => {
-                    return (
-                      <ListItemButton
-                        onClick={() => {
-                          setCurrentColorID(v.id);
-                        }}
-                        key={v.id}
-                      >
-                        <ListItemIcon>
-                          <ImageSearchRounded />
-                        </ListItemIcon>
-                        <ListItemText primary={v.name} secondary={v.id} />
-                      </ListItemButton>
-                    );
-                  })}
+                {!loading ? (
+                  colorSet
+                    .filter((v) => {
+                      return (
+                        v.isGradient === isGradient &&
+                        (v.name.includes(searchKey.trim()) ||
+                          searchKey.trim() === "")
+                      );
+                    })
+                    .map((v) => {
+                      return (
+                        <ListItemButton
+                          onClick={() => {
+                            setCurrentColorID(v.id);
+                          }}
+                          key={v.id}
+                        >
+                          <ListItemIcon>
+                            {v.id === currentColorID ? (
+                              <ColorizeRounded color="success"></ColorizeRounded>
+                            ) : isGradient ? (
+                              <GradientRounded color="info" />
+                            ) : (
+                              <ColorLensRounded color="info" />
+                            )}
+                          </ListItemIcon>
+                          <ListItemText primary={v.name} secondary={v.id} />
+                        </ListItemButton>
+                      );
+                    })
+                ) : (
+                  <>
+                    {new Array(5).fill(1).map((v, i) => {
+                      return (
+                        <ListItemButton key={i}>
+                          <ListItemIcon>
+                            <Skeleton
+                              variant="circular"
+                              width={20}
+                              height={20}
+                            />
+                          </ListItemIcon>
+                          <ListItemText primary={<Skeleton />} />
+                        </ListItemButton>
+                      );
+                    })}
+                  </>
+                )}
               </List>
             </Grid>
             <Grid overflow="auto" height="100%" item xs>
               {isGradient ? (
-                <GradientPicker curretID={currentColorID}></GradientPicker>
+                <GradientPicker
+                  currentID={currentColorID}
+                  setCurrentID={(id: string) => {
+                    setCurrentColorID(id);
+                    getColors();
+                  }}
+                ></GradientPicker>
               ) : (
-                <DispersedPicker curretID={currentColorID}></DispersedPicker>
+                <DispersedPicker
+                  currentID={currentColorID}
+                  setCurrentID={(id: string) => {
+                    setCurrentColorID(id);
+                    getColors();
+                  }}
+                ></DispersedPicker>
               )}
             </Grid>
           </Grid>

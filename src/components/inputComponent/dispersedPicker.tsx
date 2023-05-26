@@ -1,4 +1,5 @@
 import { AddRounded, ColorizeRounded } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
   Button,
   ButtonGroup,
@@ -13,7 +14,14 @@ import {
 import { Box } from "@mui/system";
 import { rgb } from "d3";
 import { enqueueSnackbar } from "notistack";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { ct } from "~/pages/utils/const/anchorOrigin";
 import { trpc } from "~/utils/trpc";
 
@@ -51,23 +59,14 @@ function SliderColor(prop: {
   );
 }
 
-export function DispersedPicker(prop: { curretID: string }) {
+export function DispersedPicker(prop: {
+  currentID: string;
+  setCurrentID: (id: string) => void;
+}) {
+  const { currentID, setCurrentID } = prop;
+  const [pending, setPending] = useState<boolean>(false);
   const trpcContext = trpc.useContext();
-  const [colors, setColors] = useState<string[]>([
-    "#66ccff",
-    "#139268",
-    "#ccff66",
-    "#ffcc66",
-    "#123456",
-    "#431341",
-    "#ac3413",
-    "#dd3214",
-    "#431342",
-    "#ac3453",
-    "#dd3274",
-    "#dd3224",
-    "#d12274",
-  ]);
+  const [colors, setColors] = useState<string[]>([]);
   const [color, setColor] = useState<{
     r: number;
     g: number;
@@ -77,20 +76,21 @@ export function DispersedPicker(prop: { curretID: string }) {
     g: 0,
     b: 0,
   });
+  const [name, setName] = useState<string>("newColor");
   const getInitColor = useCallback(async () => {
-    let id = prop.curretID;
-    console.log(id);
-
+    let id = currentID;
     if (id === "") {
-      return;
+      setName("new ColorSet");
+      setColors([]);
     } else {
       let colorSet = await trpcContext.client.user.getColorByID.query(id);
+      setName(colorSet.name);
       setColors(colorSet.colors);
     }
-  }, [prop.curretID]);
+  }, [currentID]);
   useEffect(() => {
     getInitColor();
-  }, [prop.curretID]);
+  }, [currentID]);
   const dSetColor = debounce(useCallback(setColor, []));
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
   return (
@@ -145,22 +145,61 @@ export function DispersedPicker(prop: { curretID: string }) {
           </IconButton>
         </Grid>
         <Grid item pt={5} xs={12}>
-          <Box display="flex" justifyContent="center">
-            <Button
+          <Box
+            display="flex"
+            gap={2}
+            flexDirection="column"
+            alignItems="center"
+          >
+            <TextField
+              label="name"
+              color="info"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                setName(e.target.value.trim().slice(0, 20));
+              }}
+              value={name}
+            ></TextField>
+            <LoadingButton
+              loading={pending}
               onClick={async () => {
-                let retColors =
-                  await trpcContext.client.user.addPresetColor.mutate({
-                    name: "myColor",
-                    colors: colors,
-                    positions: null,
+                try {
+                  if (colors.length <= 2) {
+                    enqueueSnackbar({
+                      message: "至少需要3个颜色",
+                      variant: "warning",
+                      anchorOrigin: ct,
+                    });
+                    return;
+                  }
+                  setPending(true);
+                  let retColors =
+                    await trpcContext.client.user.upsertPresetColor.mutate({
+                      id: currentID === "" ? null : currentID,
+                      name: name,
+                      colors: colors,
+                      positions: null,
+                    });
+                  setCurrentID(retColors.id);
+                  enqueueSnackbar({
+                    message: "成功",
+                    variant: "success",
+                    anchorOrigin: ct,
                   });
-                console.log(colors);
+                } catch (e) {
+                  enqueueSnackbar({
+                    message: "网络错误",
+                    variant: "error",
+                    anchorOrigin: ct,
+                  });
+                } finally {
+                  setPending(false);
+                }
               }}
               variant="contained"
               color="success"
             >
-              提交更改
-            </Button>
+              {currentID === "" ? "添加颜色集" : "提交更改"}
+            </LoadingButton>
           </Box>
         </Grid>
       </Grid>
@@ -234,6 +273,15 @@ export function DispersedPicker(prop: { curretID: string }) {
           <ButtonGroup fullWidth variant="contained">
             <Button
               onClick={() => {
+                let hex = rgb(color.r, color.g, color.b).formatHex();
+                if (colors.includes(hex)) {
+                  enqueueSnackbar({
+                    message: "颜色已存在",
+                    variant: "warning",
+                    anchorOrigin: ct,
+                  });
+                  return;
+                }
                 if (currentIndex === -1) {
                   setColors([
                     ...colors,

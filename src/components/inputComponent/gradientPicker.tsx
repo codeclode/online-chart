@@ -1,4 +1,5 @@
 import { ColorizeRounded } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
   Button,
   ButtonGroup,
@@ -22,22 +23,25 @@ import {
   useState,
 } from "react";
 import { ct } from "~/pages/utils/const/anchorOrigin";
+import { trpc } from "~/utils/trpc";
 
 export type gradientStop = {
   position: number;
   color: string;
 };
 
-export function GradientPicker(prop: { curretID: string }) {
+export function GradientPicker(prop: {
+  currentID: string;
+  setCurrentID: (id: string) => void;
+}) {
+  const { currentID, setCurrentID } = prop;
+  const trpcContext = trpc.useContext();
+  const [pending, setPending] = useState<boolean>(false);
   const [isDraging, setIsDraging] = useState<boolean>(false);
   const rectRef = useRef<SVGRectElement | null>(null);
   const [colorSet, setColorSet] = useState<gradientStop[]>([
     {
       color: "#66ccff",
-      position: 0,
-    },
-    {
-      color: "#cc66ff",
       position: 50,
     },
   ]);
@@ -52,10 +56,41 @@ export function GradientPicker(prop: { curretID: string }) {
     },
     [currentIndex, colorSet]
   );
-  useEffect(() => {
-    console.log(prop.curretID);
-  }, [prop.curretID]);
+  const [name, setName] = useState<string>("newColor");
   const { enqueueSnackbar } = useSnackbar();
+  useEffect(() => {
+    async function initColor() {
+      setCurrentIndex(0);
+      if (currentID !== "") {
+        try {
+          let colors = await trpcContext.client.user.getColorByID.query(
+            currentID
+          );
+          let colorSet = colors.colors.map((v, i) => {
+            return {
+              color: v,
+              position: colors.positions[i] as number,
+            };
+          });
+          setColorSet(colorSet);
+        } catch (e) {
+          enqueueSnackbar({
+            message: "网络错误",
+            variant: "error",
+            anchorOrigin: ct,
+          });
+        }
+      } else {
+        setColorSet([
+          {
+            color: "#6cf",
+            position: 50,
+          },
+        ]);
+      }
+    }
+    initColor();
+  }, [currentID]);
   const dChangeColor = debounce(changeColor);
   const currentColor = colorSet[currentIndex];
   const addnewColor = function (p: number) {
@@ -110,14 +145,14 @@ export function GradientPicker(prop: { curretID: string }) {
     [currentColor]
   );
   return (
-    <Stack alignItems="center">
+    <Stack alignItems="center" gap="15px">
       <svg
         onMouseMove={onMouseMove}
         onMouseUp={() => {
           setIsDraging(false);
         }}
         width="60%"
-        viewBox="-20 0 140 40"
+        viewBox="-20 0 140 30"
       >
         <defs>
           <linearGradient id="gradient">
@@ -182,8 +217,17 @@ export function GradientPicker(prop: { curretID: string }) {
           );
         })}
       </svg>
-      <Grid spacing={2} container width="60%">
-        <Grid item xs={2}>
+      <TextField
+        sx={{ width: "50%" }}
+        label="name"
+        color="info"
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          setName(e.target.value.trim().slice(0, 20));
+        }}
+        value={name}
+      ></TextField>
+      <Grid container width="60%">
+        <Grid item xs={4}>
           <Stack
             height="100%"
             justifyContent="space-around"
@@ -201,6 +245,28 @@ export function GradientPicker(prop: { curretID: string }) {
                 });
               }}
             ></TextField>
+            <IconButton
+              onClick={() => {
+                if ("EyeDropper" in window) {
+                  let example = new (window as any).EyeDropper()
+                    .open()
+                    .then((e: { sRGBHex: string }) => {
+                      changeColor({
+                        color: e.sRGBHex,
+                        position: currentColor ? currentColor.position : 0,
+                      });
+                    });
+                } else {
+                  enqueueSnackbar({
+                    message: "当前浏览器不支持试色~~",
+                    variant: "success",
+                    anchorOrigin: ct,
+                  });
+                }
+              }}
+            >
+              <ColorizeRounded />
+            </IconButton>
             <Slider
               min={0}
               max={100}
@@ -224,28 +290,59 @@ export function GradientPicker(prop: { curretID: string }) {
               valueLabelDisplay="auto"
               color="secondary"
             ></Slider>
-            <IconButton
-              onClick={() => {
-                if ("EyeDropper" in window) {
-                  let example = new (window as any).EyeDropper()
-                    .open()
-                    .then((e: { sRGBHex: string }) => {
-                      changeColor({
-                        color: e.sRGBHex,
-                        position: currentColor ? currentColor.position : 0,
-                      });
+            <ButtonGroup variant="contained">
+              <Button
+                color="error"
+                onClick={() => {
+                  if (colorSet.length <= 1) {
+                    enqueueSnackbar({
+                      message: "至少有一个颜色",
+                      variant: "error",
+                      anchorOrigin: ct,
                     });
-                } else {
-                  enqueueSnackbar({
-                    message: "当前浏览器不支持试色~~",
-                    variant: "success",
-                    anchorOrigin: ct,
-                  });
-                }
-              }}
-            >
-              <ColorizeRounded />
-            </IconButton>
+                    return;
+                  }
+                  colorSet.splice(currentIndex, 1);
+                  setColorSet(colorSet);
+                  setCurrentIndex(-1);
+                }}
+              >
+                删除
+              </Button>
+              <LoadingButton
+                variant="contained"
+                loading={pending}
+                onClick={async () => {
+                  try {
+                    setPending(true);
+                    let retColorSet =
+                      await trpcContext.client.user.upsertPresetColor.mutate({
+                        id: currentID === "" ? null : currentID,
+                        name: name,
+                        colors: colorSet.map((v) => v.color),
+                        positions: colorSet.map((v) => v.position),
+                      });
+                    setCurrentID(retColorSet.id);
+                    enqueueSnackbar({
+                      message: "成功",
+                      variant: "success",
+                      anchorOrigin: ct,
+                    });
+                  } catch (e) {
+                    enqueueSnackbar({
+                      message: "网络错误",
+                      variant: "error",
+                      anchorOrigin: ct,
+                    });
+                  } finally {
+                    setPending(false);
+                  }
+                }}
+                color="success"
+              >
+                提交
+              </LoadingButton>
+            </ButtonGroup>
           </Stack>
         </Grid>
         <Grid item xs>
@@ -307,35 +404,6 @@ export function GradientPicker(prop: { curretID: string }) {
           </Stack>
         </Grid>
       </Grid>
-      <ButtonGroup
-        fullWidth
-        variant="contained"
-        sx={{
-          width: "50%",
-          mt: "15px",
-          overflow: "hidden",
-        }}
-      >
-        <Button
-          color="error"
-          onClick={() => {
-            if (colorSet.length <= 1) {
-              enqueueSnackbar({
-                message: "至少有一个颜色",
-                variant: "error",
-                anchorOrigin: ct,
-              });
-              return;
-            }
-            colorSet.splice(currentIndex, 1);
-            setColorSet(colorSet);
-            setCurrentIndex(-1);
-          }}
-        >
-          删除
-        </Button>
-        <Button color="success">保存</Button>
-      </ButtonGroup>
     </Stack>
   );
 }

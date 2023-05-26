@@ -3,7 +3,7 @@ const { sign, verify } = jwt;
 const jwtKey = "rhy37iu5rh";
 const refreshKey = "RWTJWF510227";
 export function makeSign(user: string, isRefresh: boolean = false) {
-  return sign({ user }, isRefresh ? refreshKey : jwtKey, {
+  return sign({ userName: user }, isRefresh ? refreshKey : jwtKey, {
     expiresIn: isRefresh ? "7d" : "2h",
   });
 }

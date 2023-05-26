@@ -31,7 +31,11 @@ import {
   BookOutlined,
   ContactsOutlined,
 } from "@mui/icons-material";
-import { colorSettings, loginPath } from "~/pages/utils/const/routers";
+import {
+  colorSettings,
+  loginPath,
+  workSpacePath,
+} from "~/pages/utils/const/routers";
 import { authorColor, bookColor } from "~/pages/utils/const/color";
 import { useRouter } from "next/router";
 export const AppHeader = forwardRef(function (
@@ -85,7 +89,6 @@ export const AppHeader = forwardRef(function (
           id="account-menu"
           PaperProps={{
             elevation: 0,
-            style: { width: "12em" },
             sx: {
               overflow: "visible",
               filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
@@ -119,16 +122,19 @@ export const AppHeader = forwardRef(function (
             </Typography>
           </MenuItem>
           <Divider></Divider>
-          <MenuItem>
+          <MenuItem
+            onClick={() => {
+              router.push(workSpacePath);
+            }}
+          >
             <ListItemIcon>
               <BubbleChartOutlined fontSize="small" />
             </ListItemIcon>
-            个人图表
+            图表绘制
           </MenuItem>
           <Divider></Divider>
           <MenuItem
             onClick={() => {
-              console.log(123);
               router.push(colorSettings);
             }}
           >
@@ -139,7 +145,10 @@ export const AppHeader = forwardRef(function (
           </MenuItem>
           <MenuItem
             onClick={() => {
-              if (tokenCtx.setToken) tokenCtx.setToken("");
+              if (tokenCtx.setToken) {
+                tokenCtx.setToken("");
+              }
+              localStorage.removeItem("refreshToken");
             }}
           >
             <ListItemIcon>
@@ -187,7 +196,6 @@ function AppMenu(prop: {
         prop.setOpen(false);
       }}
       anchorEl={prop.anchor}
-      sx={{ maxWidth: "10em" }}
     >
       <MenuItem>
         <ListItemIcon>
@@ -195,7 +203,11 @@ function AppMenu(prop: {
         </ListItemIcon>
         文档
       </MenuItem>
-      <MenuItem>
+      <MenuItem
+        onClick={() => {
+          window.open("https://github.com/codeclode", "__blank");
+        }}
+      >
         <ListItemIcon>
           <ContactsOutlined style={{ color: authorColor }} />
         </ListItemIcon>

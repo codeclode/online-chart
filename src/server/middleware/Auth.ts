@@ -15,7 +15,7 @@ export const auth = middleware(({ ctx, next }) => {
       } else {
         return next({
           ctx: {
-            username: ver.username,
+            username: ver.userName,
           },
         });
       }

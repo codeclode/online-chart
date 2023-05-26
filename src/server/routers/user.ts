@@ -132,10 +132,11 @@ export const userRouter = router({
     };
     return retUser;
   }),
-  addPresetColor: privateProduce
+  upsertPresetColor: privateProduce
     .input(
       z.object({
-        name: string().max(10).min(1),
+        id: nullable(string()),
+        name: string().max(20).min(1),
         colors: array(string()),
         positions: nullable(array(number())),
       })
@@ -150,8 +151,16 @@ export const userRouter = router({
         throw new PwdNotCorrectOrNoUserError();
       } else {
         try {
-          let colors = await prisma.colorPreSet.create({
-            data: {
+          let colors = await prisma.colorPreSet.upsert({
+            where: {
+              id: input.id ? input.id : "eeeea11cd4ff3737900943e9",
+            },
+            update: {
+              name: input.name,
+              colors: input.colors,
+              positions: input.positions || [],
+            },
+            create: {
               name: input.name,
               colors: input.colors,
               positions: input.positions || [],
@@ -160,7 +169,7 @@ export const userRouter = router({
           });
           return colors;
         } catch (e) {
-          console.log(e);
+          throw new Error();
         }
       }
     }),

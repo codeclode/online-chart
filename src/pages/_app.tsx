@@ -17,6 +17,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { TokenOverTimeERROR } from "~/server/utils/const/errors";
 import { setHeaderToken, trpc } from "../utils/trpc";
 import "./styles/index.global.css";
+import { rt } from "./utils/const/anchorOrigin";
 export const TokenContext = createContext<{
   token: string;
   setToken: Dispatch<SetStateAction<string>> | null;
@@ -49,8 +50,8 @@ const MyApp: AppType = ({ Component, pageProps }: AppProps) => {
           await trpcContext.client.user.getTokenWithRefreshToken.query({
             refreshToken,
           });
-        setToken(token.token);
         setHeaderToken(token.token);
+        setToken(token.token);
         return true;
       } else {
         return false;
@@ -59,9 +60,14 @@ const MyApp: AppType = ({ Component, pageProps }: AppProps) => {
       if (
         typeof e === "object" &&
         e.message &&
-        e === TokenOverTimeERROR.messageString
+        e.message === TokenOverTimeERROR.messageString
       ) {
         localStorage.removeItem("refreshToken");
+        enqueueSnackbar({
+          message: "登录过期",
+          variant: "info",
+          anchorOrigin: rt,
+        });
         return false;
       } else {
         alert("网络错误");
