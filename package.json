@@ -37,6 +37,7 @@
     "notistack": "^3.0.1",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
+    "react-joyride": "^2.5.4",
     "zod": "^3.21.4"
   },
   "devDependencies": {

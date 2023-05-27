@@ -136,5 +136,19 @@ export class ChartController {
     let cx = start + hx * width,
       cy = start + vx * height;
     this.node.setAttribute("transform-origin", `${cx} ${cy}`);
+    let targetIndex = vx * 2 * 3 + hx * 2;
+    console.log(targetIndex);
+
+    select(this.node)
+      .selectAll(".helper")
+      .data(new Array(0, 0, 0, 0, 1, 1, 1, 1, 1))
+      .attr("class", (d, i) => {
+        console.log(i + d);
+
+        return (
+          "helper " +
+          (Math.abs(i + d - targetIndex) < 0.1 ? "originAnchor" : "")
+        );
+      });
   }
 }

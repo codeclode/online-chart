@@ -47,7 +47,7 @@ import {
 import { supportFileExt } from "~/pages/utils/const/others";
 import { CSV2Data, getFileExt } from "~/pages/utils/dataTransformer";
 import { textOver } from "~/pages/utils/styleFactory";
-import { DataContext } from "~/pages/workSpace";
+import { canvasGuideSteps, DataContext } from "~/pages/workSpace";
 const ListTextSx: SxProps<Theme> = {
   "& .MuiListItemText-primary": {
     fontSize: "0.6em",
@@ -188,51 +188,56 @@ export function FileInput(prop: { headerHeight: number }) {
     }
   }, [setData, setDataTypes]);
   return (
-    <>
+    <div>
       <Stack justifyContent="space-around">
-        <Box
-          ref={fileInputRef}
-          sx={{
-            border: "1px solid " + blue[100],
-            borderRadius: "10px",
-            transition: "0.3s all ease",
-            height: "150px",
-            width: "200px",
-            "&:hover": {
-              cursor: "pointer",
-              boxShadow: "inset 0 0 10px 4px " + blue[100],
-            },
-          }}
-          onClick={() => {
-            !fileRef.current ? null : fileRef.current.click();
-          }}
+        <div
+          style={{ width: "min-content", height: "min-content" }}
+          id={canvasGuideSteps.fileInput}
         >
-          <Stack
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            height="100%"
+          <Box
+            ref={fileInputRef}
+            sx={{
+              border: "1px solid " + blue[100],
+              borderRadius: "10px",
+              transition: "0.3s all ease",
+              height: "150px",
+              width: "200px",
+              "&:hover": {
+                cursor: "pointer",
+                boxShadow: "inset 0 0 10px 4px " + blue[100],
+              },
+            }}
+            onClick={() => {
+              !fileRef.current ? null : fileRef.current.click();
+            }}
           >
-            {!fileName ? (
-              <AddRounded
-                sx={{
-                  fontSize: "64px",
-                }}
-                color="info"
-              ></AddRounded>
-            ) : (
-              <DatasetOutlined
-                sx={{
-                  fontSize: "64px",
-                }}
-                color="info"
-              ></DatasetOutlined>
-            )}
-            <Typography sx={{ ...textOver(2) }} variant="h5">
-              {fileName ? fileName : "选择文件"}
-            </Typography>
-          </Stack>
-        </Box>
+            <Stack
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              height="100%"
+            >
+              {!fileName ? (
+                <AddRounded
+                  sx={{
+                    fontSize: "64px",
+                  }}
+                  color="info"
+                ></AddRounded>
+              ) : (
+                <DatasetOutlined
+                  sx={{
+                    fontSize: "64px",
+                  }}
+                  color="info"
+                ></DatasetOutlined>
+              )}
+              <Typography sx={{ ...textOver(2) }} variant="h5">
+                {fileName ? fileName : "选择文件"}
+              </Typography>
+            </Stack>
+          </Box>
+        </div>
         <Box
           sx={{
             border: "1px solid " + blue[200],
@@ -323,6 +328,6 @@ export function FileInput(prop: { headerHeight: number }) {
         ref={fileRef}
         onInput={fileInputHandler}
       ></input>
-    </>
+    </div>
   );
 }

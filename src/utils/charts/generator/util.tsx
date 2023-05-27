@@ -89,7 +89,7 @@ function ColorSelecter(prop: {
 }) {
   return (
     <FormControl color="info">
-      <InputLabel htmlFor="grouped-select">Grouping</InputLabel>
+      <InputLabel htmlFor="grouped-select">colorSet</InputLabel>
       <Select
         value={prop.color}
         onChange={(e: SelectChangeEvent<string>) => {

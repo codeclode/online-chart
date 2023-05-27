@@ -38,6 +38,7 @@ import {
 } from "~/pages/utils/const/routers";
 import { authorColor, bookColor } from "~/pages/utils/const/color";
 import { useRouter } from "next/router";
+import { indexGuideStepsID } from "~/pages";
 export const AppHeader = forwardRef(function (
   _props,
   ref: ForwardedRef<HTMLDivElement | null>
@@ -69,6 +70,7 @@ export const AppHeader = forwardRef(function (
       endIcon={<SendRounded />}
       variant="contained"
       href={loginPath}
+      id={indexGuideStepsID.avatarStep}
     >
       登录
     </Button>
@@ -77,6 +79,7 @@ export const AppHeader = forwardRef(function (
     Opts = (
       <>
         <IconButton
+          id={indexGuideStepsID.avatarStep}
           onClick={(e) => {
             setAnchorAvatar(e.currentTarget);
           }}
@@ -164,6 +167,7 @@ export const AppHeader = forwardRef(function (
     <AppBar ref={ref} position="static">
       <Toolbar>
         <IconButton
+          id={indexGuideStepsID.appHeaderMenuStep}
           onClick={(e) => {
             setOpen(!open);
             setAnchorEl(e.currentTarget);

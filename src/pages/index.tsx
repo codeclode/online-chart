@@ -15,8 +15,11 @@ import { features } from "./utils/const/features";
 import { AppHeader } from "~/components/appHeader";
 import { bigButton } from "./utils/const/color";
 import { useRouter } from "next/router";
-import { useSnackbar } from "notistack";
 import { workSpacePath } from "./utils/const/routers";
+import { useEffect, useState } from "react";
+import { Step } from "react-joyride";
+import dynamic from "next/dynamic";
+import { GuideLocal } from "./utils/const/guideLocal";
 
 function FeatureCard(prop: {
   feature: string;
@@ -59,15 +62,75 @@ function FeatureCard(prop: {
     </Grid>
   );
 }
+const JoyRideNoSSR = dynamic(() => import("react-joyride"), { ssr: false });
+
+export const indexGuideStepsID = {
+  appHeaderMenuStep: "guide-headerMenu",
+  avatarStep: "guide-avatar",
+  startStep: "guide-start",
+  reStudyStep: "guide-reStudy",
+};
+
+const steps: Step[] = [
+  {
+    target: "#" + indexGuideStepsID.appHeaderMenuStep,
+    content: "单击此按钮获取其他信息",
+  },
+  {
+    target: "#" + indexGuideStepsID.avatarStep,
+    content: "登录或展开菜单，方便登出、预设置颜色以及进入画布",
+  },
+  {
+    target: "#" + indexGuideStepsID.reStudyStep,
+    content: "重新进行新手指引",
+  },
+  {
+    target: "#" + indexGuideStepsID.startStep,
+    content: "开始！",
+  },
+];
+
+const storageFlag = "indexGuideFinish";
 
 export default function IndexPage() {
   const theme = useTheme();
   const LLsm = useMediaQuery(theme.breakpoints.down("sm"));
   const router = useRouter();
-  const { enqueueSnackbar } = useSnackbar();
+  const [guideRun, setGuideRun] = useState<boolean>(false);
+  useEffect(() => {
+    localStorage.getItem(storageFlag) === "1"
+      ? setGuideRun(false)
+      : setGuideRun(true);
+  }, []);
   return (
     <div>
       <AppHeader></AppHeader>
+      <JoyRideNoSSR
+        locale={GuideLocal}
+        callback={(data) => {
+          if (data.status === "finished") {
+            setGuideRun(false);
+            localStorage.setItem(storageFlag, "1");
+          }
+        }}
+        run={guideRun}
+        disableOverlayClose={true}
+        steps={steps}
+        continuous={true}
+        showSkipButton={true}
+        showProgress={true}
+        styles={{
+          tooltipContainer: {
+            textAlign: "left",
+          },
+          buttonNext: {
+            backgroundColor: "#6cf",
+          },
+          buttonBack: {
+            marginRight: 10,
+          },
+        }}
+      />
       <Stack sx={{ m: 1 }} alignItems="center" direction="column">
         <Stack alignItems="center">
           <InsertChartOutlinedRounded
@@ -111,6 +174,7 @@ export default function IndexPage() {
             justifyContent="space-around"
           >
             <Button
+              id={indexGuideStepsID.startStep}
               variant="contained"
               sx={{ ...bigButton, ...{ fontSize: LLsm ? "0.4em" : "1em" } }}
               size="large"
@@ -121,12 +185,16 @@ export default function IndexPage() {
               开始
             </Button>
             <Button
+              id={indexGuideStepsID.reStudyStep}
               size="large"
               variant="contained"
               sx={{ ...bigButton, ...{ fontSize: LLsm ? "0.4em" : "1em" } }}
               color="secondary"
+              onClick={() => {
+                setGuideRun(true);
+              }}
             >
-              学习
+              指引
             </Button>
           </Box>
         </Stack>

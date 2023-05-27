@@ -43,7 +43,7 @@
   cursor: w-resize;
 }
 
-.helper:last-of-type {
+.helper.originAnchor {
   cursor: grabbing;
   fill: #6cf;
 }

@@ -1,42 +1,17 @@
+import { ArrowDropDown, ArrowRight } from "@mui/icons-material";
 import {
-  ArrowDropDown,
-  ArrowRight,
-  CenterFocusStrongRounded,
-  RedoRounded,
-  UndoRounded,
-  ZoomInRounded,
-  ZoomOutRounded,
-} from "@mui/icons-material";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
-import {
-  Box,
   Button,
-  ButtonGroup,
   Card,
-  Grid,
-  Tab,
-  Tabs,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { blue, grey } from "@mui/material/colors";
+import { grey } from "@mui/material/colors";
 import { Stack } from "@mui/system";
-import {
-  ChangeEvent,
-  MouseEvent,
-  MutableRefObject,
-  useCallback,
-  useContext,
-} from "react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { canvasGuideSteps } from "~/pages/workSpace";
 import { ChartController } from "~/utils/charts/generator/Controller";
-import { CanvasContext } from "../canvas";
-import { ColorPicker } from "../inputComponent/colorPicker";
 import { BGSetting } from "./options/bgSetting";
 import { ChartSetting } from "./options/chartSetting";
 
@@ -61,6 +36,7 @@ export function OptionsInCanvas(prop: {
 
   return (
     <Card
+      id={canvasGuideSteps.chartModal}
       sx={{
         position: "absolute",
         left: "10px",
