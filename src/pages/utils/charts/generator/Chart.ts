@@ -14,7 +14,7 @@ export abstract class Chart<T extends Map<string, DataType> | DataType> {
   origin: string = "left top";
   node: SVGElement | null = null;
   controller: ChartController | null = null;
-  colorSet: keyof typeof schemes;
+  colorSet: string;
   colorMap: Map<string, string>;
   data: Map<string, T>;
   abstract columns: string[];
@@ -23,7 +23,7 @@ export abstract class Chart<T extends Map<string, DataType> | DataType> {
     y: number,
     width: number,
     height: number,
-    colorSet: keyof typeof schemes,
+    colorSet: string,
     data: Map<string, T>
   ) {
     this.x = x;
@@ -59,7 +59,6 @@ export abstract class Chart<T extends Map<string, DataType> | DataType> {
       }
     }
     const { width, height } = svg.viewBox.baseVal;
-    console.log(width, height, x, y);
     let centerX = (width / 2 - x) / scale - chartWidth / 2;
     let centerY = (height / 2 - y) / scale - chartHeight / 2;
     return { centerX, centerY };
@@ -68,7 +67,7 @@ export abstract class Chart<T extends Map<string, DataType> | DataType> {
   abstract generateNode(
     parent: SVGSVGElement | SVGGElement,
     setChartController: Dispatch<SetStateAction<ChartController | null>>
-  ): boolean;
+  ): Promise<boolean>;
   setTranslate(x: number, y?: number): void {
     this.x = x;
     if (typeof y === "number") {

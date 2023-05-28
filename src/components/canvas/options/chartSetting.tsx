@@ -17,8 +17,7 @@ import {
 } from "@mui/material";
 import { blue } from "@mui/material/colors";
 import { useState, useEffect, ChangeEvent, MouseEvent } from "react";
-import { ChartController } from "~/utils/charts/generator/Controller";
-import { getColor } from "~/utils/charts/generator/util";
+import { ChartController } from "~/pages/utils/charts/generator/Controller";
 
 const origins: {
   name: string;

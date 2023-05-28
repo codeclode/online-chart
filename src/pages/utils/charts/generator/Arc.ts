@@ -2,7 +2,7 @@ import { arc, pie, select } from "d3";
 import { normalize } from "../number/util";
 import { Chart } from "./Chart";
 import { ChartController } from "./Controller";
-import { createSVGElement, getColor } from "./util";
+import { createSVGElement, getColor, getColorSet } from "./util";
 import * as schemes from "d3-scale-chromatic";
 
 export class ArcChart extends Chart<number> {
@@ -14,7 +14,7 @@ export class ArcChart extends Chart<number> {
     outerRadius: number,
     svg: SVGSVGElement,
     root: SVGGElement,
-    colorSet: keyof typeof schemes,
+    colorSet: string,
     data: Map<string, number>,
     dataCloumns: string[]
   ) {
@@ -30,10 +30,9 @@ export class ArcChart extends Chart<number> {
     this.columns = dataCloumns;
   }
 
-  generateNode(parent: SVGElement) {
+  async generateNode(parent: SVGElement) {
     let node = createSVGElement("g");
     const newArc = arc();
-
     const pieFn = pie().padAngle(0);
 
     let v = Array.from(this.data.values());
@@ -45,7 +44,7 @@ export class ArcChart extends Chart<number> {
       .attr("class", "chartContainer")
       .append("g")
       .attr("transform", `translate(${this.outerRadius},${this.outerRadius})`);
-
+    const colorSet = await getColorSet(this.colorSet);
     innerG
       .selectAll(".arc")
       .data(arcs)
@@ -61,11 +60,9 @@ export class ArcChart extends Chart<number> {
         })
       )
       .attr("fill", (d) => {
-        console.log(normalizer(d.value));
-
-        let color = getColor(this.colorSet, d.index, normalizer(d.value));
+        let color = getColor(colorSet, d.index, normalizer(d.value));
         this.colorMap.set(k[d.index] as string, color);
-        return getColor(this.colorSet, d.index, normalizer(d.value));
+        return getColor(colorSet, d.index, normalizer(d.value));
       });
 
     innerG
@@ -78,7 +75,7 @@ export class ArcChart extends Chart<number> {
       })
       .attr("class", "label")
       .attr("fill", (d) => {
-        return getColor(this.colorSet, d.index + 5, 1 - normalizer(d.value));
+        return getColor(colorSet, d.index + 5, 1 - normalizer(d.value));
       })
       .attr("text-anchor", "middle")
       .attr("font-size", (this.outerRadius - this.innerRadius) / 3)

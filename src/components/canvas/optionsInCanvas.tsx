@@ -11,7 +11,7 @@ import { grey } from "@mui/material/colors";
 import { Stack } from "@mui/system";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { canvasGuideSteps } from "~/pages/workSpace";
-import { ChartController } from "~/utils/charts/generator/Controller";
+import { ChartController } from "~/pages/utils/charts/generator/Controller";
 import { BGSetting } from "./options/bgSetting";
 import { ChartSetting } from "./options/chartSetting";
 

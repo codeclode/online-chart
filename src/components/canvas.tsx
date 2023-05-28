@@ -11,8 +11,8 @@ import {
 } from "react";
 import { useEffect, useState } from "react";
 import { Step } from "react-joyride";
-import { appendController } from "~/utils/charts/appendController";
-import { ChartController } from "~/utils/charts/generator/Controller";
+import { appendController } from "~/pages/utils/charts/appendController";
+import { ChartController } from "~/pages/utils/charts/generator/Controller";
 import { ChartModal } from "./canvas/chartModal";
 import { DataModal } from "./canvas/dataModal";
 import { OperateButtonGroup } from "./canvas/operateButtonGroup";

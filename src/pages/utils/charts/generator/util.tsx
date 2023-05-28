@@ -26,6 +26,11 @@ import { ArcChart } from "./Arc";
 
 import * as schemes from "d3-scale-chromatic";
 import { DataContext } from "~/pages/workSpace";
+import { commenRequest, trpc } from "~/utils/trpc";
+import { createTRPCProxyClient } from "@trpc/client";
+import { gradient2f } from "../../gradient2Fn";
+import { gradientStop } from "~/components/inputComponent/gradientPicker";
+import { ColorNotFoundError } from "~/server/utils/const/errors";
 
 export function createSVGElement<T extends keyof SVGElementTagNameMap>(
   nodeType: T
@@ -57,18 +62,48 @@ export function colorDiverging(
   if (Array.isArray(item)) return false;
   return true;
 }
+
+export async function getColorSet(
+  colorSet: string
+): Promise<string[] | ((t: number) => string)> {
+  let trans = Reflect.get(schemes, colorSet);
+
+  if (trans === undefined) {
+    try {
+      let preset = await commenRequest.user.getColorByID.query(colorSet);
+      if (preset.positions.length !== 0) {
+        let gradient: gradientStop[] = preset.colors.map((v, i) => {
+          return {
+            color: v,
+            position: preset.positions[i] || 100,
+          };
+        });
+        trans = gradient2f(gradient);
+      } else {
+        trans = preset.colors;
+      }
+      return trans;
+    } catch (e: any) {
+      console.log(e);
+      if (e && e.message && e.message === ColorNotFoundError.messageString) {
+        return schemes.interpolateWarm;
+      }
+    }
+  } else {
+    return trans;
+  }
+  return schemes.interpolateWarm;
+}
+
 export function getColor(
-  colorSet: keyof typeof schemes,
+  colorSet: string[] | ((t: number) => string),
   index: number,
   d: number
 ): string {
-  let trans = schemes[colorSet];
-  if (colorCategorical(trans)) {
-    return trans[index % trans.length] || "#6cf";
-  } else if (colorDiverging(trans)) {
-    return trans(d);
+  if (Array.isArray(colorSet)) {
+    return colorSet[index % colorSet.length] || "#6cf";
   } else {
-    return "#6cf";
+    return colorSet(d);
   }
 }
 
@@ -87,6 +122,7 @@ function ColorSelecter(prop: {
   color: string;
   onChange: Dispatch<SetStateAction<string>>;
 }) {
+  const colorPerSet = trpc.user.getColorPreSetByUserID.useQuery();
   return (
     <FormControl color="info">
       <InputLabel htmlFor="grouped-select">colorSet</InputLabel>
@@ -123,6 +159,18 @@ function ColorSelecter(prop: {
               </MenuItem>
             );
           })}
+        <ListSubheader>自定义</ListSubheader>
+        {colorPerSet.data ? (
+          colorPerSet.data.preset.map((v) => {
+            return (
+              <MenuItem value={v.id} key={v.id}>
+                {v.name}
+              </MenuItem>
+            );
+          })
+        ) : (
+          <MenuItem>加载中。。。</MenuItem>
+        )}
       </Select>
     </FormControl>
   );

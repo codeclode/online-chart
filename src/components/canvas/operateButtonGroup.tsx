@@ -12,7 +12,7 @@ import { useSnackbar } from "notistack";
 import { MutableRefObject, Dispatch, SetStateAction, useContext } from "react";
 import { lb } from "~/pages/utils/const/anchorOrigin";
 import { canvasGuideSteps, DataContext } from "~/pages/workSpace";
-import { ChartController } from "~/utils/charts/generator/Controller";
+import { ChartController } from "~/pages/utils/charts/generator/Controller";
 import { outputSVG, outputPNG } from "~/pages/utils/outputImg";
 import { CanvasContext } from "../canvas";
 import { Box } from "@mui/system";

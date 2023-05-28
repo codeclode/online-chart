@@ -19,7 +19,7 @@ import { modalSX } from "~/pages/utils/types/const";
 import {
   ChartDetail,
   ChartDetailComponent,
-} from "~/utils/charts/generator/util";
+} from "~/pages/utils/charts/generator/util";
 
 export function ChartModal(prop: {
   setModalOpen: Dispatch<SetStateAction<boolean>>;
