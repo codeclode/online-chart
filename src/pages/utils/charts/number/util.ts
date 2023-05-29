@@ -1,4 +1,4 @@
-import { extent } from "d3";
+import { extent, sum } from "d3";
 
 export function normalize(data: number[]) {
   let [min, max] = extent(data);
@@ -12,5 +12,12 @@ export function normalize(data: number[]) {
     } else {
       return 0.5;
     }
+  };
+}
+
+export function data2Percent(data: number[]) {
+  let dSum = sum(data, (d) => Math.abs(d));
+  return function (d: number) {
+    return Math.abs(d) / dSum;
   };
 }

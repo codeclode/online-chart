@@ -4,6 +4,21 @@
   margin: 0;
   padding: 0;
 }
+::-webkit-scrollbar {
+  width: 4px;
+  height: 6px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: rgb(75, 206, 232);
+  border-radius: 3px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(39, 162, 239);
+}
 
 .rootGroup {
   /* transform-box: fill-box;
@@ -23,7 +38,8 @@
   cursor: nw-resize;
 }
 
-.helper:nth-of-type(2), .helper:nth-of-type(7) {
+.helper:nth-of-type(2),
+.helper:nth-of-type(7) {
   cursor: n-resize;
 }
 
@@ -39,7 +55,8 @@
   cursor: se-resize;
 }
 
-.helper:nth-of-type(4), .helper:nth-of-type(5) {
+.helper:nth-of-type(4),
+.helper:nth-of-type(5) {
   cursor: w-resize;
 }
 
@@ -70,14 +87,13 @@ circle.gradientController:active {
   cursor: grabbing;
 }
 
-
 @keyframes dispersedInFocus {
   from {
-    outline-color: #f6c
+    outline-color: #f6c;
   }
 
   to {
-    outline-color: #6cf
+    outline-color: #6cf;
   }
 }
 

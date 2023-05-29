@@ -2,8 +2,7 @@ import { arc, pie, select } from "d3";
 import { normalize } from "../number/util";
 import { Chart } from "./Chart";
 import { ChartController } from "./Controller";
-import { createSVGElement, getColor, getColorSet } from "./util";
-import * as schemes from "d3-scale-chromatic";
+import { createSVGElement, getColor, getColorSet, getTextColor } from "./util";
 
 export class ArcChart extends Chart<number> {
   innerRadius: number;
@@ -75,7 +74,7 @@ export class ArcChart extends Chart<number> {
       })
       .attr("class", "label")
       .attr("fill", (d) => {
-        return getColor(colorSet, d.index + 5, 1 - normalizer(d.value));
+        return getTextColor(colorSet, d.index, d.value, normalizer);
       })
       .attr("text-anchor", "middle")
       .attr("font-size", (this.outerRadius - this.innerRadius) / 3)

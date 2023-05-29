@@ -1,7 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
 import { ChartController } from "./Controller";
-
-import * as schemes from "d3-scale-chromatic";
 import { DataType } from "~/pages/utils/const/dataWorkers";
 export abstract class Chart<T extends Map<string, DataType> | DataType> {
   x: number;
@@ -60,18 +58,17 @@ export abstract class Chart<T extends Map<string, DataType> | DataType> {
     }
     const { width, height } = svg.viewBox.baseVal;
     let centerX = (width / 2 - x) / scale - chartWidth / 2;
+    centerX = Number(centerX.toPrecision(2))
     let centerY = (height / 2 - y) / scale - chartHeight / 2;
+    centerY = Number(centerY.toPrecision(2))
     return { centerX, centerY };
   }
 
-  abstract generateNode(
-    parent: SVGSVGElement | SVGGElement,
-    setChartController: Dispatch<SetStateAction<ChartController | null>>
-  ): Promise<boolean>;
+  abstract generateNode(parent: SVGSVGElement | SVGGElement): Promise<boolean>;
   setTranslate(x: number, y?: number): void {
-    this.x = x;
+    this.x = Number(x.toPrecision(2));
     if (typeof y === "number") {
-      this.y = y;
+      this.y = Number(y.toPrecision(2));
     }
     this.transform();
   }

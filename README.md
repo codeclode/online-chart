@@ -65,12 +65,12 @@ web前端svg+d3+trpc图表生成
 - const常量定义
 - fileInput和outputImage数据导入和图表导出
 - dataTransnsform数据转化（批处理和一些管道）
+- charts中，定义Controller类和Chart抽象基类和一系列实现（PIE、TREE等）
+- charts的绘制属于管道结构，投入数据->数据归一化->归一化以后的数据转化为可视化维度（大小、颜色）->svg元素结点绘制
 
 #### utils
 
-- 不介绍除了charts文件夹的内容，里边是自定义错误和鉴权代码
-- charts中，定义Controller类和Chart抽象基类和一系列实现（PIE、TREE等）
-- charts的绘制属于管道结构，投入数据->数据归一化->归一化以后的数据转化为可视化维度（大小、颜色）->svg元素结点绘制
+- 里边是自定义错误和鉴权代码
 
 #### components
 

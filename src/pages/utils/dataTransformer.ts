@@ -76,11 +76,23 @@ export const date2String: (d: Date, format: DateFormat) => string = function (
   return moment(d).format(format);
 };
 
-export const string2Number: (str: string) => number = function (str) {
+export const string2Number = function (
+  str: string,
+  throwErr: boolean = true
+): number {
   let num = Number(str);
   if (isNaN(num)) {
-    throw new transTypeError("numberStr is NaN");
+    if (throwErr) {
+      throw new transTypeError("numberStr is NaN");
+    } else {
+      return 0;
+    }
   } else {
     return num;
   }
 };
+
+export const any2String: (input: string | number | Date | boolean) => string =
+  function (input) {
+    return String(input);
+  };
