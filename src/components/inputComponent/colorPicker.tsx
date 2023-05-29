@@ -83,7 +83,7 @@ function CirclePicker(prop: {
             let ctx = canvasRef.current.getContext("2d");
             if (!ctx) return;
             let canvas = canvasRef.current;
-            let { x, y, width, height } = canvas.getBoundingClientRect();
+            let { x, y, width } = canvas.getBoundingClientRect();
             let { x: mx, y: my } = e.nativeEvent;
             let dpr = canvas.width / width;
             let placeX = Math.floor((mx - x) * dpr);

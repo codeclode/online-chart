@@ -143,7 +143,7 @@ function ChartDataInfo(prop: { chartController: ChartController }) {
             .filter((v) => {
               return searchKeyWord === "" || v.includes(searchKeyWord);
             })
-            .map((k, i) => {
+            .map((k) => {
               const d = data.get(k);
               return typeof d === "object" ? null : (
                 <TableRow key={k}>
@@ -173,13 +173,13 @@ export function ChartSetting(prop: { chartController: ChartController }) {
     chartController.target.getTransform()
   );
   const [ob, setOB] = useState(
-    new MutationObserver((recoards) => {
+    new MutationObserver(() => {
       setTransform(chartController.target.getTransform());
     })
   );
   useEffect(() => {
     ob.disconnect();
-    let newOB = new MutationObserver((recoards) => {
+    let newOB = new MutationObserver(() => {
       setTransform(chartController.target.getTransform());
     });
     setTransform(chartController.target.getTransform());

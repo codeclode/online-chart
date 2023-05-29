@@ -1,7 +1,6 @@
 import {
   extent,
   select,
-  transition,
   zoom,
   zoomIdentity,
   zoomTransform,

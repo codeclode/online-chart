@@ -5,29 +5,18 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
-  TextField,
 } from "@mui/material";
 import { ChartType } from "@prisma/client";
-import { useSnackbar } from "notistack";
 import {
-  ChangeEvent,
   Dispatch,
   MutableRefObject,
-  ReactNode,
   SetStateAction,
-  useCallback,
   useContext,
-  useEffect,
-  useState,
 } from "react";
-import { CanvasContext } from "~/components/canvas";
-import { ct } from "~/pages/utils/const/anchorOrigin";
-import { ArcChart } from "./Arc";
 
 import * as schemes from "d3-scale-chromatic";
 import { DataContext } from "~/pages/workSpace";
 import { commenRequest, trpc } from "~/utils/trpc";
-import { createTRPCProxyClient } from "@trpc/client";
 import { gradient2f } from "../../gradient2Fn";
 import { gradientStop } from "~/components/inputComponent/gradientPicker";
 import { ColorNotFoundError } from "~/server/utils/const/errors";
@@ -198,7 +187,7 @@ export function DataSelecter(prop: {
   id: string;
 }) {
   const { value, onChange, id } = prop;
-  const { data, dataTypes } = useContext(DataContext);
+  const { data } = useContext(DataContext);
   return (
     <FormControl color="info">
       <InputLabel htmlFor={`data-selecter-${id}`}>{`${id}`}</InputLabel>
@@ -211,7 +200,7 @@ export function DataSelecter(prop: {
         label={`${id}`}
       >
         {data
-          ? data.columns.map((v, i) => {
+          ? data.columns.map((v) => {
               return (
                 <MenuItem key={v} value={v}>
                   {v}

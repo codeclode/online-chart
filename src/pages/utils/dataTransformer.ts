@@ -1,7 +1,6 @@
-import { csvParse, DSVRowArray, json } from "d3";
+import { csvParse, DSVRowArray } from "d3";
 import moment from "moment";
 import { transTypeError } from "~/utils/exceptions";
-import { DataType } from "./const/dataWorkers";
 
 export const fromUnitToChar = function (arr: Uint8Array): string {
   let temp = Array.from<number>(arr);
@@ -76,10 +75,7 @@ export const date2String: (d: Date, format: DateFormat) => string = function (
   return moment(d).format(format);
 };
 
-export const string2Number = function (
-  str: string,
-  throwErr: boolean = true
-): number {
+export const string2Number = function (str: string, throwErr = true): number {
   let num = Number(str);
   if (isNaN(num)) {
     if (throwErr) {

@@ -7,7 +7,6 @@ import {
   createContext,
   Dispatch,
   SetStateAction,
-  StrictMode,
   useCallback,
   useEffect,
   useState,

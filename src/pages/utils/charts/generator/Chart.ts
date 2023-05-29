@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
 import { ChartController } from "./Controller";
 import { DataType } from "~/pages/utils/const/dataWorkers";
 export abstract class Chart<T extends Map<string, DataType> | DataType> {
@@ -9,7 +8,7 @@ export abstract class Chart<T extends Map<string, DataType> | DataType> {
   rotation: number;
   baseWidth: number;
   baseHeight: number;
-  origin: string = "left top";
+  origin = "left top";
   node: SVGElement | null = null;
   controller: ChartController | null = null;
   colorSet: string;

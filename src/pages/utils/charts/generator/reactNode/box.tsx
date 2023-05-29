@@ -17,7 +17,6 @@ import {
 import { DataContext } from "~/pages/workSpace";
 import { ct } from "~/pages/utils/const/anchorOrigin";
 import { TextField } from "@mui/material";
-import { color } from "d3";
 import { string2Number } from "~/pages/utils/dataTransformer";
 import { BoxChart } from "../Box";
 

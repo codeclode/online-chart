@@ -9,13 +9,12 @@ import {
 } from "@mui/icons-material";
 import { ButtonGroup, Button } from "@mui/material";
 import { useSnackbar } from "notistack";
-import { MutableRefObject, Dispatch, SetStateAction, useContext } from "react";
+import { Dispatch, SetStateAction, useContext } from "react";
 import { lb } from "~/pages/utils/const/anchorOrigin";
 import { canvasGuideSteps, DataContext } from "~/pages/workSpace";
 import { ChartController } from "~/pages/utils/charts/generator/Controller";
 import { outputSVG, outputPNG } from "~/pages/utils/outputImg";
 import { CanvasContext } from "../canvas";
-import { Box } from "@mui/system";
 
 export function OperateButtonGroup(prop: {
   setDataModalOpen: Dispatch<SetStateAction<boolean>>;

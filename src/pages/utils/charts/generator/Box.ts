@@ -1,16 +1,14 @@
-import { Dispatch, SetStateAction } from "react";
 import { Chart } from "./Chart";
 import { ChartController } from "./Controller";
 import {
   HierarchyNode,
   hierarchy,
   select,
-  selectAll,
   sum,
   treemap,
   treemapBinary,
 } from "d3";
-import { data2Percent, normalize } from "../number/util";
+import { data2Percent } from "../number/util";
 import { createSVGElement } from "./util";
 
 export class BoxChart extends Chart<number> {
@@ -43,7 +41,7 @@ export class BoxChart extends Chart<number> {
       }),
       value: sum(Array(...this.data.values())),
     });
-    d.sum((d) => Math.max(0, 1));
+    d.sum((d) => Math.abs(d.value));
     let g = createSVGElement("g");
     let gSelecter = select(g);
     gSelecter

@@ -31,7 +31,7 @@ export function DataModal(prop: {
   modalOpen: boolean;
 }) {
   const { enqueueSnackbar } = useSnackbar();
-  const { dataTypes, data, setData, setDataTypes } = useContext(DataContext);
+  const { dataTypes, data, setDataTypes } = useContext(DataContext);
   const [tempTypes, setTempTypes] = useState<DataTypeString[]>([]);
   useEffect(() => {
     if (dataTypes) setTempTypes([...dataTypes]);

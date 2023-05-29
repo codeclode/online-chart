@@ -1,15 +1,9 @@
 import {
   AddRounded,
   DatasetOutlined,
-  ExpandLess,
-  ExpandMore,
   InboxRounded,
-  SettingsOutlined,
-  StarBorder,
 } from "@mui/icons-material";
 import {
-  Button,
-  ButtonGroup,
   Collapse,
   List,
   ListItemButton,
@@ -25,12 +19,9 @@ import {
 } from "@mui/material";
 import { blue } from "@mui/material/colors";
 import { Box, Stack } from "@mui/system";
-import { DSVRowArray, gray } from "d3";
 import { useSnackbar } from "notistack";
 import {
   ChangeEvent,
-  Dispatch,
-  SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -39,7 +30,6 @@ import {
 } from "react";
 import { ct, lb } from "~/pages/utils/const/anchorOrigin";
 import {
-  DataType,
   dataTypeColor,
   DataTypeString,
   workers,
@@ -279,7 +269,7 @@ export function FileInput(prop: { headerHeight: number }) {
                   <ColumnItem
                     key={v}
                     name={v}
-                    columnType={dataTypes![i]}
+                    columnType={dataTypes[i]}
                     open={opens[i]}
                     changeOpen={() => {
                       setOpens(

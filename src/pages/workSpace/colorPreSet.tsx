@@ -1,22 +1,14 @@
 import {
   AddRounded,
-  BeachAccessRounded,
   BlurLinearRounded,
   ColorizeRounded,
   ColorLensRounded,
   GradientRounded,
-  ImageSearchRounded,
-  SearchRounded,
-  WorkRounded,
 } from "@mui/icons-material";
 import {
-  Avatar,
-  Button,
   Grid,
-  IconButton,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -25,7 +17,7 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { blue, green, red } from "@mui/material/colors";
+import { blue, red } from "@mui/material/colors";
 import { Box, Stack } from "@mui/system";
 import { useSnackbar } from "notistack";
 import {
@@ -40,7 +32,6 @@ import { AppHeader } from "~/components/appHeader";
 import { DispersedPicker } from "~/components/inputComponent/dispersedPicker";
 import {
   GradientPicker,
-  gradientStop,
 } from "~/components/inputComponent/gradientPicker";
 import { setHeaderToken, trpc } from "~/utils/trpc";
 import { ct } from "../utils/const/anchorOrigin";

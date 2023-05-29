@@ -4,14 +4,13 @@ import {
   Button,
   ButtonGroup,
   debounce,
-  FormControl,
   Grid,
   IconButton,
   Slider,
   TextField,
 } from "@mui/material";
-import { Box, Stack } from "@mui/system";
-import { color, rgb } from "d3";
+import { Stack } from "@mui/system";
+import { rgb } from "d3";
 import { useSnackbar } from "notistack";
 import {
   ChangeEvent,
@@ -248,7 +247,7 @@ export function GradientPicker(prop: {
             <IconButton
               onClick={() => {
                 if ("EyeDropper" in window) {
-                  let example = new (window as any).EyeDropper()
+                  new (window as any).EyeDropper()
                     .open()
                     .then((e: { sRGBHex: string }) => {
                       changeColor({

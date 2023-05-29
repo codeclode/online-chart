@@ -1,4 +1,4 @@
-import { D3DragEvent, drag, select, selectAll } from "d3";
+import { select } from "d3";
 import { Dispatch, SetStateAction } from "react";
 import { DataType } from "~/pages/utils/const/dataWorkers";
 import { Chart } from "./Chart";
@@ -18,7 +18,7 @@ const placements: [number, number][] = [
 const helperCircleRadius = 1;
 const gap = 1;
 const rectLineWidth = 0.5;
-const baseStrokeWidth = 50;
+// const baseStrokeWidth = 50;
 export class ChartController {
   target: Chart<Map<string, DataType> | DataType>;
   parent: SVGElement;
@@ -137,7 +137,7 @@ export class ChartController {
     let targetIndex = vx * 2 * 3 + hx * 2;
     select(this.node)
       .selectAll(".helper")
-      .data(new Array(0, 0, 0, 0, 1, 1, 1, 1, 1))
+      .data([0, 0, 0, 0, 1, 1, 1, 1, 1])
       .attr("class", (d, i) => {
         return (
           "helper " +

@@ -1,6 +1,6 @@
 import { SxProps, Theme } from "@mui/material";
 
-export const textOver = function (clamp: number = 2): SxProps<Theme> {
+export const textOver = function (clamp = 2): SxProps<Theme> {
   if (clamp === 1) {
     return {
       whiteSpace: "nowrap",

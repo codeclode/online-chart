@@ -24,10 +24,10 @@ export function BGSetting(prop: {
   const { svgRef, rootGroupRef } = useContext(CanvasContext);
   const [scale, setScale] = useState<string>("100%");
   const zoom = useCallback(
-    (isIn: boolean = false) => {
+    (isIn = false) => {
       if (svgRef === null || svgRef.current === null) return;
       let { x, y, height, width } = svgRef.current.getBoundingClientRect();
-      var scrollEvent = new WheelEvent("wheel", {
+      let scrollEvent = new WheelEvent("wheel", {
         bubbles: true,
         cancelable: true,
         clientX: x + width / 2,
@@ -41,8 +41,8 @@ export function BGSetting(prop: {
   );
   useEffect(() => {
     function initScale() {
-      if (rootGroupRef === null) return;
-      let scale = rootGroupRef.current!.getAttribute("transform");
+      if (rootGroupRef === null || rootGroupRef.current === null) return;
+      let scale = rootGroupRef.current.getAttribute("transform");
       if (scale) {
         scale = scale.toUpperCase();
         let regRet = /\(([\d\.]+)\)/.exec(
@@ -57,7 +57,7 @@ export function BGSetting(prop: {
     }
     initScale();
     if (rootGroupRef && rootGroupRef.current !== null) {
-      let gScaleOb = new MutationObserver((mutations) => {
+      let gScaleOb = new MutationObserver(() => {
         initScale();
       });
       gScaleOb.observe(rootGroupRef && rootGroupRef.current, {

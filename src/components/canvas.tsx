@@ -1,6 +1,5 @@
 import { debounce } from "@mui/material";
 import { Box, Stack } from "@mui/system";
-import dynamic from "next/dynamic";
 import {
   BaseSyntheticEvent,
   createContext,
@@ -10,7 +9,6 @@ import {
   useRef,
 } from "react";
 import { useEffect, useState } from "react";
-import { Step } from "react-joyride";
 import { appendController } from "~/pages/utils/charts/appendController";
 import { ChartController } from "~/pages/utils/charts/generator/Controller";
 import { ChartModal } from "./canvas/chartModal";
