@@ -1,5 +1,5 @@
 import { select } from "d3";
-import { CSV2Data } from "./dataTransformer";
+import { CSV2Data } from "../src/pages/utils/dataTransformer";
 
 export const fileInput = async function (svg: SVGSVGElement | null) {
   if (!svg) return;

@@ -81,7 +81,6 @@ export const BOXDetail: ChartDetailComponent = function (prop) {
         }
       }
     });
-    console.log(m);
     let chart = new BoxChart(
       width,
       height,
@@ -89,7 +88,7 @@ export const BOXDetail: ChartDetailComponent = function (prop) {
       rootGroupRef.current,
       color,
       m,
-      ["key:" + keyColmn, "value" + valueColmn]
+      ["key:" + keyColmn, "value:" + valueColmn]
     );
     chart.generateNode(rootGroupRef.current);
     console.log(chart);

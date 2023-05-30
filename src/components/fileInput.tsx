@@ -144,9 +144,8 @@ export function FileInput(prop: { headerHeight: number }) {
           case "csv": {
             fileContent = await CSV2Data(file);
             setData(fileContent);
-            let tempTypes: DataTypeString[] = [];
             setDataTypes(
-              fileContent.columns.map((v, i) => {
+              fileContent.columns.map(() => {
                 return "string";
               })
             );
@@ -163,6 +162,8 @@ export function FileInput(prop: { headerHeight: number }) {
           }
         }
       } catch (e) {
+        console.log(e);
+        
         enqueueSnackbar({
           message: "读取文件出错",
           variant: "error",
