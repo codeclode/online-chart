@@ -4,15 +4,11 @@ import {
   HierarchyNode,
   hierarchy,
   select,
-  sum,
   treemap,
-  treemapBinary,
-  treemapDice,
   treemapSquarify,
 } from "d3";
 import { data2Percent } from "../number/util";
 import { createSVGElement, getColor, getColorSet, getTextColor } from "./util";
-import { darken } from "@mui/material";
 
 export class BoxChart extends Chart<number> {
   columns: string[];

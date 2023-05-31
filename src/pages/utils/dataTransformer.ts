@@ -19,18 +19,8 @@ export const getFileExt = function (fileName: string): string {
   }
 };
 
-export const CSV2Data = async function (
-  file: File
-): Promise<DSVRowArray<string>> {
-  let reader = file.stream().getReader();
-  let res = await reader.read();
-  let ret = "";
-  if (!res.done) {
-    ret += fromUnitToChar(res.value);
-    res = await reader.read();
-  }
-  if (res.value) ret += fromUnitToChar(res.value);
-  return csvParse(ret);
+export const CSV2Data = function (fileContent: string): DSVRowArray<string> {
+  return csvParse(fileContent);
 };
 
 export const JSON2Data = async function (file: File): Promise<any> {

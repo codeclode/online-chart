@@ -1,6 +1,7 @@
 import {
   AddRounded,
   DatasetOutlined,
+  DriveFileMoveRounded,
   InboxRounded,
 } from "@mui/icons-material";
 import {
@@ -36,6 +37,7 @@ import {
 } from "~/pages/utils/const/dataWorkers";
 import { supportFileExt } from "~/pages/utils/const/others";
 import { CSV2Data, getFileExt } from "~/pages/utils/dataTransformer";
+import { createFileReaderWorker } from "~/pages/utils/fileReaderWorker";
 import { textOver } from "~/pages/utils/styleFactory";
 import { canvasGuideSteps, DataContext } from "~/pages/workSpace";
 const ListTextSx: SxProps<Theme> = {
@@ -121,6 +123,7 @@ export function FileInput(prop: { headerHeight: number }) {
   const [fileInputHeight, setFileInputHeight] = useState(200);
   const [opens, setOpens] = useState<Array<boolean>>([]);
   const [searchKeyWord, setSearchKeyWord] = useState("");
+  const [fileLoading, setFileLoading] = useState<boolean>(false);
   useEffect(() => {
     if (data) {
       setOpens(new Array(data.columns.length).fill(false));
@@ -132,23 +135,32 @@ export function FileInput(prop: { headerHeight: number }) {
     if (fileInputRef.current)
       setFileInputHeight(fileInputRef.current.getBoundingClientRect().height);
   }, [fileInputRef.current]);
-  const fileInputHandler = useCallback(async () => {
+  const fileInputHandler = useCallback(() => {
     if (!setData || !setDataTypes) return;
     if (fileRef.current && fileRef.current.files && fileRef.current.files[0]) {
       let file = fileRef.current.files[0];
       let fileContent = null;
+      setFileLoading(true);
       let ext = getFileExt(file.name);
       setFileName(file.name);
       try {
         switch (ext) {
           case "csv": {
-            fileContent = await CSV2Data(file);
-            setData(fileContent);
-            setDataTypes(
-              fileContent.columns.map(() => {
-                return "string";
-              })
-            );
+            const w = new Worker(createFileReaderWorker());
+            w.onmessage = (e: MessageEvent<string>) => {
+              fileContent = CSV2Data(e.data);
+              setFileLoading(false);
+              setData(fileContent);
+              setDataTypes(
+                fileContent.columns.map(() => {
+                  return "string";
+                })
+              );
+            };
+            w.onerror = (e) => {
+              throw e.error;
+            };
+            w.postMessage(file);
             break;
           }
           default: {
@@ -162,18 +174,17 @@ export function FileInput(prop: { headerHeight: number }) {
           }
         }
       } catch (e) {
-        console.log(e);
-        
         enqueueSnackbar({
           message: "读取文件出错",
           variant: "error",
           anchorOrigin: ct,
         });
+        setFileLoading(false);
       }
     } else {
       enqueueSnackbar({
-        message: "系统准备中。。。",
-        variant: "warning",
+        message: "无选择",
+        variant: "info",
         anchorOrigin: ct,
       });
     }
@@ -215,13 +226,20 @@ export function FileInput(prop: { headerHeight: number }) {
                   }}
                   color="info"
                 ></AddRounded>
+              ) : fileLoading ? (
+                <DriveFileMoveRounded
+                  sx={{
+                    fontSize: "64px",
+                  }}
+                  color="info"
+                />
               ) : (
                 <DatasetOutlined
                   sx={{
                     fontSize: "64px",
                   }}
                   color="info"
-                ></DatasetOutlined>
+                />
               )}
               <Typography sx={{ ...textOver(2) }} variant="h5">
                 {fileName ? fileName : "选择文件"}

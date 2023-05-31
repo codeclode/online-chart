@@ -7,12 +7,7 @@ import {
   SelectChangeEvent,
 } from "@mui/material";
 import { ChartType } from "@prisma/client";
-import {
-  Dispatch,
-  MutableRefObject,
-  SetStateAction,
-  useContext,
-} from "react";
+import { Dispatch, MutableRefObject, SetStateAction, useContext } from "react";
 
 import * as schemes from "d3-scale-chromatic";
 import { DataContext } from "~/pages/workSpace";
@@ -28,6 +23,7 @@ import { PATHDetail } from "./reactNode/path";
 import { RADARDetail } from "./reactNode/radar";
 import { SCATTERDetail } from "./reactNode/scatter";
 import { TREEDetail } from "./reactNode/tree";
+import { rgb } from "d3";
 
 export function createSVGElement<T extends keyof SVGElementTagNameMap>(
   nodeType: T
@@ -178,7 +174,10 @@ export function getTextColor(
   d: number,
   normalizer: (d: number) => number
 ): string {
-  return getColor(colorSet, index + 5, 1 - normalizer(d));
+  const color = rgb(getColor(colorSet, index, normalizer(d)));
+  return rgb(255 - color.r, 255 - color.g, 255 - color.b)
+    .brighter()
+    .toString();
 }
 
 export function DataSelecter(prop: {

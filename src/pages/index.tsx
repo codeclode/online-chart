@@ -191,7 +191,10 @@ export default function IndexPage() {
               sx={{ ...bigButton, ...{ fontSize: LLsm ? "0.4em" : "1em" } }}
               color="secondary"
               onClick={() => {
-                setGuideRun(true);
+                setGuideRun(false);
+                setTimeout(() => {
+                  setGuideRun(true);
+                });
               }}
             >
               指引
