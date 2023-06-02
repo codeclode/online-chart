@@ -1,12 +1,6 @@
 import { Chart } from "./Chart";
 import { ChartController } from "./Controller";
-import {
-  HierarchyNode,
-  hierarchy,
-  select,
-  treemap,
-  treemapSquarify,
-} from "d3";
+import { HierarchyNode, hierarchy, select, treemap, treemapSquarify } from "d3";
 import { data2Percent } from "../number/util";
 import { createSVGElement, getColor, getColorSet, getTextColor } from "./util";
 
@@ -61,9 +55,19 @@ export class BoxChart extends Chart<number> {
       .attr("y", (d) => d.y0)
       .attr("width", (d) => d.x1 - d.x0)
       .attr("height", (d) => d.y1 - d.y0)
-      .attr("fill", (d, i) =>
-        i !== 0 ? getColor(colorSet, i, d.value || 0) : "transparent"
-      );
+      .attr("fill", (d, i) => {
+        if (i !== 0) {
+          const data = d.data as {
+            name: string;
+            value: number;
+            sourceValue: number;
+          };
+          let color = getColor(colorSet, i, d.value || 0);
+          this.colorMap.set(data.name , color);
+          return color;
+        }
+        return "transparent";
+      });
     const time = Date.now();
 
     nodes
@@ -110,7 +114,7 @@ export class BoxChart extends Chart<number> {
         };
         if (data.name == undefined || d.value === 1) return "";
         else {
-          return  data.sourceValue;
+          return data.sourceValue;
         }
       })
       .attr("x", (d) => d.x0)

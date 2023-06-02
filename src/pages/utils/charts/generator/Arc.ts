@@ -61,7 +61,7 @@ export class ArcChart extends Chart<number> {
       .attr("fill", (d) => {
         let color = getColor(colorSet, d.index, normalizer(d.value));
         this.colorMap.set(k[d.index] as string, color);
-        return getColor(colorSet, d.index, normalizer(d.value));
+        return color;
       });
 
     innerG

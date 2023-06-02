@@ -30,12 +30,11 @@ import {
 } from "react";
 import { AppHeader } from "~/components/appHeader";
 import { DispersedPicker } from "~/components/inputComponent/dispersedPicker";
-import {
-  GradientPicker,
-} from "~/components/inputComponent/gradientPicker";
+import { GradientPicker } from "~/components/inputComponent/gradientPicker";
 import { setHeaderToken, trpc } from "~/utils/trpc";
 import { ct } from "../utils/const/anchorOrigin";
 import { TokenContext } from "../_app";
+import { useRouter } from "next/router";
 
 export default function ColorPreSetting() {
   const trpcContext = trpc.useContext();
@@ -49,6 +48,21 @@ export default function ColorPreSetting() {
   const [colorSet, setColorSet] = useState<
     { name: string; id: string; isGradient: boolean }[]
   >([]);
+  useEffect(() => {
+    async function initByID() {
+      const search = new URLSearchParams(window.location.search);
+      if (search.has("id")) {
+        const id = search.get("id") as string;
+        const c = await trpcContext.client.user.getColorByID.query(id);
+        if (c.positions.length !== 0) {
+          console.log(123);
+          setIsGradient(true);
+        }
+        setCurrentColorID(id);
+      }
+    }
+    initByID();
+  }, []);
   const getColors = useCallback(async () => {
     try {
       setLoading(true);

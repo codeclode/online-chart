@@ -18,6 +18,9 @@ import {
 import { blue } from "@mui/material/colors";
 import { useState, useEffect, ChangeEvent, MouseEvent } from "react";
 import { ChartController } from "~/pages/utils/charts/generator/Controller";
+import * as schemes from "d3-scale-chromatic";
+import { useRouter } from "next/router";
+import { colorSettings } from "~/pages/utils/const/routers";
 
 const origins: {
   name: string;
@@ -168,6 +171,7 @@ function ChartDataInfo(prop: { chartController: ChartController }) {
 
 export function ChartSetting(prop: { chartController: ChartController }) {
   const { chartController } = prop;
+  const router = useRouter();
   const [tabValue, setTabValue] = useState<string>("1");
   const [transform, setTransform] = useState(
     chartController.target.getTransform()
@@ -284,11 +288,17 @@ export function ChartSetting(prop: { chartController: ChartController }) {
             color="info"
             fullWidth
             onClick={() => {
-              window.open(
-                "https://github.com/d3/d3-scale-chromatic/blob/v3.0.0/README.md#" +
-                  chartController.target.colorSet,
-                "__blank"
-              );
+              if (!(chartController.target.colorSet in schemes)) {
+                router.push(
+                  colorSettings + "?id=" + chartController.target.colorSet
+                );
+              } else {
+                window.open(
+                  "https://github.com/d3/d3-scale-chromatic/blob/v3.0.0/README.md#" +
+                    chartController.target.colorSet,
+                  "__blank"
+                );
+              }
             }}
           >
             <Typography
