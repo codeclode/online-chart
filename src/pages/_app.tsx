@@ -69,7 +69,11 @@ const MyApp: AppType = ({ Component, pageProps }: AppProps) => {
         });
         return false;
       } else {
-        alert("网络错误");
+        enqueueSnackbar({
+          message: "网络错误",
+          variant: "error",
+          anchorOrigin: rt,
+        });
         return false;
       }
     }

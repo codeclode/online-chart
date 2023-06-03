@@ -1,8 +1,8 @@
 import {
+  ChangeEvent,
   Dispatch,
   ForwardedRef,
   forwardRef,
-  MutableRefObject,
   SetStateAction,
   useContext,
   useEffect,
@@ -13,12 +13,19 @@ import { trpc } from "~/utils/trpc";
 import {
   AppBar,
   Avatar,
+  Backdrop,
+  Box,
   Button,
+  ButtonGroup,
   Divider,
+  Fade,
   IconButton,
   ListItemIcon,
   Menu,
   MenuItem,
+  Modal,
+  Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 import Toolbar from "@mui/material/Toolbar";
@@ -30,6 +37,7 @@ import {
   SendRounded,
   BookOutlined,
   ContactsOutlined,
+  Person,
 } from "@mui/icons-material";
 import {
   colorSettings,
@@ -39,11 +47,14 @@ import {
 import { authorColor, bookColor } from "~/pages/utils/const/color";
 import { useRouter } from "next/router";
 import { indexGuideStepsID } from "~/pages";
+import { useSnackbar } from "notistack";
+import { LoadingButton } from "@mui/lab";
 export const AppHeader = forwardRef(function (
   _props,
   ref: ForwardedRef<HTMLDivElement | null>
 ) {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const [anchorAvatar, setAnchorAvatar] = useState<null | HTMLElement>(null);
@@ -51,12 +62,22 @@ export const AppHeader = forwardRef(function (
   const tokenCtx = useContext(TokenContext);
   const [userName, setUserName] = useState("用户名");
   const trpcContext = trpc.useContext();
+  const [infoChanging, setInfoChanging] = useState<boolean>(false);
+  const [newUserInfo, setNewUserInfo] = useState<{
+    username: string;
+  }>({
+    username: userName,
+  });
+  const [infoModal, setInfoModal] = useState<boolean>(false);
   useEffect(() => {
     async function getUserInfo() {
       try {
         if (tokenCtx.token !== "") {
           let user = await trpcContext.client.user.getUserInfoByToken.query();
-          if (user) setUserName(user.username);
+          if (user) {
+            setUserName(user.username);
+            setNewUserInfo({ username: user.username });
+          }
         }
       } catch (e) {
         console.error(e);
@@ -148,6 +169,16 @@ export const AppHeader = forwardRef(function (
           </MenuItem>
           <MenuItem
             onClick={() => {
+              setInfoModal(true);
+            }}
+          >
+            <ListItemIcon>
+              <Person fontSize="small" />
+            </ListItemIcon>
+            信息修改
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
               if (tokenCtx.setToken) {
                 tokenCtx.setToken("");
               }
@@ -160,6 +191,108 @@ export const AppHeader = forwardRef(function (
             登出
           </MenuItem>
         </Menu>
+        <Modal
+          open={infoModal}
+          onClose={() => {
+            return;
+          }}
+          closeAfterTransition
+          slots={{ backdrop: Backdrop }}
+          slotProps={{
+            backdrop: {
+              timeout: 500,
+            },
+          }}
+        >
+          <Fade in={infoModal}>
+            <Box
+              sx={{
+                position: "absolute",
+                bgcolor: "background.paper",
+                p: 4,
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "min-content",
+              }}
+              overflow="auto"
+            >
+              <Typography
+                minWidth="30vw"
+                whiteSpace="nowrap"
+                id="transition-modal-title"
+                variant="h4"
+                component="h4"
+                textAlign="center"
+              >
+                信息修改
+              </Typography>
+              <Stack mt={2} gap={2}>
+                <TextField
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    setNewUserInfo({
+                      username: e.target.value.trim(),
+                    });
+                  }}
+                  value={newUserInfo.username}
+                  color="info"
+                  label="新用户名"
+                />
+                {/* <TextField color="info" label="密码" /> */}
+                <ButtonGroup fullWidth>
+                  <LoadingButton
+                    loading={infoChanging}
+                    onClick={async () => {
+                      if (newUserInfo.username === userName) {
+                        enqueueSnackbar({
+                          message: "用户名无变化",
+                          variant: "warning",
+                        });
+                        return;
+                      }
+                      try {
+                        setInfoChanging(true);
+                        await trpcContext.client.user.changeUserInfo.mutate({
+                          username: newUserInfo.username,
+                        });
+                        setInfoModal(false);
+                        if (tokenCtx.setToken) {
+                          tokenCtx.setToken("");
+                        }
+                        localStorage.removeItem("refreshToken");
+                        enqueueSnackbar({
+                          message: "成功，请重新登录",
+                          variant: "success",
+                        });
+                        return;
+                      } catch {
+                        enqueueSnackbar({
+                          message: "用户名重复或网络错误",
+                          variant: "warning",
+                        });
+                      } finally {
+                        setInfoChanging(false);
+                      }
+                    }}
+                    variant="contained"
+                    color="success"
+                  >
+                    确认
+                  </LoadingButton>
+                  <Button
+                    onClick={() => {
+                      setInfoModal(false);
+                    }}
+                    variant="contained"
+                    color="info"
+                  >
+                    取消
+                  </Button>
+                </ButtonGroup>
+              </Stack>
+            </Box>
+          </Fade>
+        </Modal>
       </>
     );
   }

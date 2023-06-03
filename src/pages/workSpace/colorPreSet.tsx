@@ -34,7 +34,6 @@ import { GradientPicker } from "~/components/inputComponent/gradientPicker";
 import { setHeaderToken, trpc } from "~/utils/trpc";
 import { ct } from "../utils/const/anchorOrigin";
 import { TokenContext } from "../_app";
-import { useRouter } from "next/router";
 
 export default function ColorPreSetting() {
   const trpcContext = trpc.useContext();

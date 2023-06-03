@@ -10,7 +10,6 @@ import { encrypt } from "~/utils/encrypt";
 import { makeSign, verifier } from "~/utils/tokenMaker";
 import { JsonWebTokenError, JwtPayload, TokenExpiredError } from "jsonwebtoken";
 import { privateProduce } from "../procedures/privateProduce";
-import { User } from "@prisma/client";
 export const userRouter = router({
   register: publicProcedure
     .input(
@@ -59,6 +58,36 @@ export const userRouter = router({
           refreshToken: makeSign(user.username, true),
           token: makeSign(user.username),
         };
+      }
+    }),
+  changeUserInfo: privateProduce
+    .input(
+      object({
+        username: z.string().min(1).max(16),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const username = ctx.username;
+      const newName = input.username;
+      try {
+        let user = await prisma.user.findFirst({
+          where: {
+            username: newName,
+          },
+        });
+        if (user) {
+          throw new RepeatUserError();
+        }
+        await prisma.user.update({
+          where: {
+            username: username,
+          },
+          data: {
+            username: newName,
+          },
+        });
+      } catch {
+        throw new RepeatUserError();
       }
     }),
   getTokenWithRefreshToken: publicProcedure
