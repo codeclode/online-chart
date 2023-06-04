@@ -9,7 +9,7 @@
     "start": "next start",
     "dev": "next dev",
     "server": "ts-node ./src/server/server.ts",
-    "test":"jest"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -35,6 +35,8 @@
     "moment": "^2.29.4",
     "next": "^13.3.0",
     "next-auth": "^4.20.1",
+    "nextra": "^2.6.2",
+    "nextra-theme-docs": "^2.6.2",
     "notistack": "^3.0.1",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",

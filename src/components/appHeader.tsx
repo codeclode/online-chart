@@ -334,7 +334,9 @@ function AppMenu(prop: {
       }}
       anchorEl={prop.anchor}
     >
-      <MenuItem>
+      <MenuItem onClick={()=>{
+        window.open("/docs/acg","__blank")
+      }}>
         <ListItemIcon>
           <BookOutlined style={{ color: bookColor }} />
         </ListItemIcon>
