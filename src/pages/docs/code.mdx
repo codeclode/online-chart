@@ -1,15 +1,57 @@
 # code
 
 import { Callout } from 'nextra/components'
-
+import Link from 'next/link'
+ 
 ## 使用到的技术
-### 基础前端
-### 绘图
+<Callout type="default" emoji="🔨">
+  罗列一下技术，其实在package.json里可以一览全貌。
+</Callout>
+### 前端
+- ![react](https://img.shields.io/badge/React-18-blue)项目基础
+- ![Next](https://img.shields.io/badge/Next-SSR-black)服务端渲染
+- ![MUI](https://img.shields.io/badge/MUI-5.13-6cf)UI框架
+- ![Nextra](https://img.shields.io/badge/nextra-docs-green)md(x)->docs
+- ![d3](https://img.shields.io/badge/d3-draw-f5834c)绘图+数据处理
+- ![jest](https://img.shields.io/badge/jest-test-c63d14)测试
 ### 后端
+- ![trpc](https://img.shields.io/badge/tRPC-fb-blue)前后端大一统
+- ![ts](https://img.shields.io/badge/ts-5-007acc)ts数据安全
 ### 数据库
+- ![mongodb](https://img.shields.io/badge/mongodb-db-6cac48)文档数据库
+- ![prisma](https://img.shields.io/badge/prisma-orm-0e3d59)ORM框架
+## 如何让程序运行起来
+<Callout type="error" emoji="😭">
+  数据库——可能是最麻烦的地方。
+</Callout>
+为了让mongodb支持事务，prisma要求如果使用mongodb作为数据库，那么需要启动三个mongodb作为主、从、投票。
+因此如果想要启动，必须先了解如何启动三个mongodb。
 
-## 如何阅读
+<Link style={{color:"#6cf"}} target="_blank" href="https://blog.csdn.net/weixin_52851967/article/details/126860698">复制集启动攻略</Link>
 
+<Callout type="warning" emoji="✨">
+  依赖与prisma生成
+</Callout>
+```shell
+npm i
+#下载依赖
+npx prisma init --datasource-provider sqlite 
+#初始化prisma,请记得在此之前修改.env中DATABASE_URL为您自己的mongodb路径
+prisma generate
+#初始化prisma,请记得在此之前修改.env中DATABASE_URL为您自己的mongodb路径
+```
+如果prisma出现问题，那么请前往
+<Link style={{color:"#6cf"}} target="_blank" href="
+https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/mongodb-typescript-mongodb">prisma+mongodb启动方案</Link>
+查看命令顺序(笔者不敢确保上面的命令可以在你的电脑正确运行)
+
+<Callout type="info" emoji="😎">
+  成功了不
+</Callout>
+```shell
+npm run dev
+```
+如果到了这一步，应该就没有问题了。
 ## 其他
 <Callout type="error" emoji="😎">
   欢迎fork和抄袭😎~~

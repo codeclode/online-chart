@@ -1,4 +1,5 @@
 import { DocumentScannerRounded } from "@mui/icons-material";
+import { Link } from "@mui/material";
 
 export default {
   logo: <>
@@ -7,8 +8,15 @@ export default {
     onLine-chart
   </span>
   </>,
+  feedback:{
+    content:"问题反馈",
+    useLink:()=>"https://github.com/codeclode/online-chart/issues/new"
+  },
   project: {
     link: 'https://github.com/codeclode/online-chart'
+  },
+  editLink:{
+    component:<a target="_blank" href="https://github.com/codeclode/online-chart" rel="noreferrer">fork</a>
   },
   footer: {
     text: (
