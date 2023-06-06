@@ -1,8 +1,15 @@
-import { debounce } from "@mui/material";
+import {
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  debounce,
+} from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import {
   BaseSyntheticEvent,
   createContext,
+  MouseEvent as ReactMouseEvent,
   MutableRefObject,
   useCallback,
   useContext,
@@ -15,6 +22,7 @@ import { ChartModal } from "./canvas/chartModal";
 import { DataModal } from "./canvas/dataModal";
 import { OperateButtonGroup } from "./canvas/operateButtonGroup";
 import { OptionsInCanvas } from "./canvas/optionsInCanvas";
+import { ContentCut, DeleteRounded } from "@mui/icons-material";
 
 export const CanvasContext = createContext<{
   svgRef: null | MutableRefObject<SVGSVGElement | null>;
@@ -67,6 +75,11 @@ function GridInCanvas(prop: { showGrid: boolean }) {
 }
 
 export const CanvasWithOptions = function (prop: { headerHeight: number }) {
+  const [contextMenuOpen, setContextMenuOpen] = useState({
+    show: false,
+    x: 0,
+    y: 0,
+  });
   const [dataModalOpen, setDataModalOpen] = useState(false);
   const [chartModalOpen, setChartModalOpen] = useState(false);
   const [bgColor, setBgColor] = useState<string>("#d8b474ac");
@@ -118,7 +131,42 @@ export const CanvasWithOptions = function (prop: { headerHeight: number }) {
           position="relative"
           overflow="hidden"
         >
+          <Menu
+            open={contextMenuOpen.show}
+            anchorReference="anchorPosition"
+            anchorPosition={{ top: contextMenuOpen.y, left: contextMenuOpen.x }}
+            onClose={() => {
+              setContextMenuOpen({
+                ...contextMenuOpen,
+                show: false,
+              });
+            }}
+          >
+            <MenuItem
+              disabled={ChartController.instance === null}
+              onClick={() => {
+                ChartController.deleteTarget();
+                setContextMenuOpen({
+                  ...contextMenuOpen,
+                  show: false,
+                });
+              }}
+            >
+              <ListItemIcon>
+                <DeleteRounded fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>删除选中图表</ListItemText>
+            </MenuItem>
+          </Menu>
           <svg
+            onContextMenu={(e: ReactMouseEvent<SVGSVGElement>) => {
+              setContextMenuOpen({
+                x: e.pageX,
+                y: e.pageY,
+                show: true,
+              });
+              e.preventDefault();
+            }}
             ref={svgRef}
             width="100%"
             height="100%"
@@ -133,6 +181,7 @@ export const CanvasWithOptions = function (prop: { headerHeight: number }) {
               }
             }}
           >
+            <text>{String(contextMenuOpen)}</text>
             <rect
               x="0"
               y="0"

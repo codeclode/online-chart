@@ -1,5 +1,4 @@
 import { DocumentScannerRounded } from "@mui/icons-material";
-import { Link } from "@mui/material";
 
 export default {
   logo: <>

@@ -57,9 +57,9 @@ export abstract class Chart<T extends Map<string, DataType> | DataType> {
     }
     const { width, height } = svg.viewBox.baseVal;
     let centerX = (width / 2 - x) / scale - chartWidth / 2;
-    centerX = Number(centerX.toPrecision(2))
+    centerX = Number(centerX.toPrecision(2));
     let centerY = (height / 2 - y) / scale - chartHeight / 2;
-    centerY = Number(centerY.toPrecision(2))
+    centerY = Number(centerY.toPrecision(2));
     return { centerX, centerY };
   }
 
@@ -71,6 +71,14 @@ export abstract class Chart<T extends Map<string, DataType> | DataType> {
     }
     this.transform();
   }
+
+  deleteNode() {
+    let parent = null;
+    if (this.node && (parent = this.node.parentElement)) {
+      parent.removeChild(this.node);
+    }
+  }
+
   rotate(rotation: number) {
     this.rotation = rotation;
     this.transform();

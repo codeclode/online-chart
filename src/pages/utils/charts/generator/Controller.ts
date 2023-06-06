@@ -35,13 +35,20 @@ export class ChartController {
     this.target.bindController(this);
     this.node = this.generateNode();
     parent.appendChild(this.node);
-
     this.setOrigin(this.target.origin);
     ChartController.instance = this;
     if (ChartController.setReactInstance !== null) {
       ChartController.setReactInstance(this);
     }
   }
+
+  static deleteTarget() {
+    if (this.instance && this.instance.target) {
+      this.instance.target.deleteNode();
+      ChartController.removeInstance();
+    }
+  }
+
   static removeInstance() {
     if (ChartController.instance) {
       if (ChartController.setReactInstance !== null) {
