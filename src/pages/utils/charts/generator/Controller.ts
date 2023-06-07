@@ -2,7 +2,7 @@ import { select } from "d3";
 import { Dispatch, SetStateAction } from "react";
 import { DataType } from "~/pages/utils/const/dataWorkers";
 import { Chart } from "./Chart";
-import { createSVGElement } from "./util";
+import { classGenerate, createSVGElement } from "./util";
 const placements: [number, number][] = [
   [0, 0],
   [0.5, 0],
@@ -120,6 +120,7 @@ export class ChartController {
   deleteNode() {
     this.parent.removeChild(this.node);
   }
+
   setOrigin(origin: string) {
     let [h, v] = origin.split(" ");
     let hx = 0,

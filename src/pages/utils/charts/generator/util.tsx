@@ -24,11 +24,24 @@ import { RADARDetail } from "./reactNode/radar";
 import { SCATTERDetail } from "./reactNode/scatter";
 import { TREEDetail } from "./reactNode/tree";
 import { rgb } from "d3";
+import { Chart } from "./Chart";
+import { BoxChart } from "./Box";
+import { ArcChart } from "./Arc";
 
 export function createSVGElement<T extends keyof SVGElementTagNameMap>(
   nodeType: T
 ): SVGElementTagNameMap[T] {
   return document.createElementNS("http://www.w3.org/2000/svg", nodeType);
+}
+
+export function classGenerate(base: any) {
+  const chartTypes: any[] = [BoxChart, ArcChart];
+  for (let i = 0; i < chartTypes.length; i++) {
+    if (base instanceof chartTypes[i]) {
+      return chartTypes[i];
+    }
+  }
+  return null;
 }
 
 export function colorCategorical(

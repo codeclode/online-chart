@@ -1,4 +1,5 @@
 import {
+  Divider,
   ListItemIcon,
   ListItemText,
   Menu,
@@ -14,6 +15,8 @@ import {
   useCallback,
   useContext,
   useRef,
+  Dispatch,
+  SetStateAction,
 } from "react";
 import { useEffect, useState } from "react";
 import { appendController } from "~/pages/utils/charts/appendController";
@@ -22,7 +25,17 @@ import { ChartModal } from "./canvas/chartModal";
 import { DataModal } from "./canvas/dataModal";
 import { OperateButtonGroup } from "./canvas/operateButtonGroup";
 import { OptionsInCanvas } from "./canvas/optionsInCanvas";
-import { ContentCut, DeleteRounded } from "@mui/icons-material";
+import {
+  CircleOutlined,
+  ColorizeRounded,
+  DeleteRounded,
+  RectangleOutlined,
+} from "@mui/icons-material";
+import { useRouter } from "next/router";
+import { colorSettings } from "~/pages/utils/const/routers";
+import { createSVGElement } from "~/pages/utils/charts/generator/util";
+import { select } from "d3";
+import { Chart } from "~/pages/utils/charts/generator/Chart";
 
 export const CanvasContext = createContext<{
   svgRef: null | MutableRefObject<SVGSVGElement | null>;
@@ -74,11 +87,170 @@ function GridInCanvas(prop: { showGrid: boolean }) {
   );
 }
 
+const ContextMenu = function (prop: {
+  contextMenuOpen: {
+    x: number;
+    y: number;
+    show: boolean;
+  };
+  setContextMenuOpen: Dispatch<
+    SetStateAction<{
+      x: number;
+      y: number;
+      show: boolean;
+    }>
+  >;
+}) {
+  const { rootGroupRef, svgRef } = useContext(CanvasContext);
+  const [currentNode, setCurrentNode] = useState<null | SVGElement>(null);
+  const { contextMenuOpen, setContextMenuOpen } = prop;
+  const preNode = useRef<null | SVGElement>(null);
+  const router = useRouter();
+  useEffect(() => {
+    if (svgRef && svgRef.current) {
+      svgRef.current.addEventListener("click", (e) => {
+        setCurrentNode(null);
+      });
+    }
+  }, [svgRef]);
+  useEffect(() => {
+    if (currentNode) {
+      ChartController.removeInstance();
+      select(currentNode)
+        .attr("class", "gradientController")
+        .attr("stroke-dasharray", "1 1");
+      preNode.current = currentNode;
+    } else {
+      select(preNode.current)
+        .attr("class", "")
+        .attr("stroke-dasharray", "");
+    }
+  }, [currentNode]);
+  return (
+    <Menu
+      open={contextMenuOpen.show}
+      anchorReference="anchorPosition"
+      anchorPosition={{ top: contextMenuOpen.y, left: contextMenuOpen.x }}
+      onClose={() => {
+        setContextMenuOpen({
+          ...contextMenuOpen,
+          show: false,
+        });
+      }}
+    >
+      <MenuItem
+        disabled={ChartController.instance === null && currentNode === null}
+        onClick={() => {
+          if (currentNode && currentNode.parentNode) {
+            currentNode.parentNode.removeChild(currentNode);
+            setCurrentNode(null)
+          } else {
+            ChartController.deleteTarget();
+          }
+          setContextMenuOpen({
+            ...contextMenuOpen,
+            show: false,
+          });
+        }}
+      >
+        <ListItemIcon>
+          <DeleteRounded fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>删除选中图表</ListItemText>
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          router.push(colorSettings);
+        }}
+      >
+        <ListItemIcon>
+          <ColorizeRounded fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>颜色预置</ListItemText>
+      </MenuItem>
+      <Divider />
+      <MenuItem
+        onClick={() => {
+          if (
+            svgRef &&
+            svgRef.current &&
+            rootGroupRef &&
+            rootGroupRef.current
+          ) {
+            let rect = createSVGElement("rect");
+            let dRect = select(rect);
+            let { centerX, centerY } = Chart.getCenter(
+              svgRef.current,
+              rootGroupRef.current,
+              10,
+              10
+            );
+            dRect
+              .attr("x", centerX)
+              .attr("y", centerY)
+              .attr("width", 10)
+              .attr("height", 10)
+              .attr("stroke", "black")
+              .attr("fill", "none");
+            rect.addEventListener("click", function (e) {
+              setCurrentNode(rect);
+              e.stopPropagation();
+            });
+            rootGroupRef.current.appendChild(rect);
+          }
+          setContextMenuOpen({ ...contextMenuOpen, show: false });
+        }}
+      >
+        <ListItemIcon>
+          <RectangleOutlined fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>矩形</ListItemText>
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          if (
+            svgRef &&
+            svgRef.current &&
+            rootGroupRef &&
+            rootGroupRef.current
+          ) {
+            let circle = createSVGElement("circle");
+            let dCircle = select(circle);
+            let { centerX, centerY } = Chart.getCenter(
+              svgRef.current,
+              rootGroupRef.current,
+              20,
+              20
+            );
+            dCircle
+              .attr("cx", centerX + 10)
+              .attr("cy", centerY + 10)
+              .attr("r", 10)
+              .attr("stroke", "black")
+              .attr("fill", "none");
+            circle.addEventListener("click", function (e) {
+              setCurrentNode(circle);
+              e.stopPropagation();
+            });
+            rootGroupRef.current.appendChild(circle);
+          }
+          setContextMenuOpen({ ...contextMenuOpen, show: false });
+        }}
+      >
+        <ListItemIcon>
+          <CircleOutlined fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>圆形</ListItemText>
+      </MenuItem>
+    </Menu>
+  );
+};
+
 export const CanvasWithOptions = function (prop: { headerHeight: number }) {
   const [contextMenuOpen, setContextMenuOpen] = useState({
-    show: false,
     x: 0,
     y: 0,
+    show: false,
   });
   const [dataModalOpen, setDataModalOpen] = useState(false);
   const [chartModalOpen, setChartModalOpen] = useState(false);
@@ -131,33 +303,10 @@ export const CanvasWithOptions = function (prop: { headerHeight: number }) {
           position="relative"
           overflow="hidden"
         >
-          <Menu
-            open={contextMenuOpen.show}
-            anchorReference="anchorPosition"
-            anchorPosition={{ top: contextMenuOpen.y, left: contextMenuOpen.x }}
-            onClose={() => {
-              setContextMenuOpen({
-                ...contextMenuOpen,
-                show: false,
-              });
-            }}
-          >
-            <MenuItem
-              disabled={ChartController.instance === null}
-              onClick={() => {
-                ChartController.deleteTarget();
-                setContextMenuOpen({
-                  ...contextMenuOpen,
-                  show: false,
-                });
-              }}
-            >
-              <ListItemIcon>
-                <DeleteRounded fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>删除选中图表</ListItemText>
-            </MenuItem>
-          </Menu>
+          <ContextMenu
+            contextMenuOpen={contextMenuOpen}
+            setContextMenuOpen={setContextMenuOpen}
+          ></ContextMenu>
           <svg
             onContextMenu={(e: ReactMouseEvent<SVGSVGElement>) => {
               setContextMenuOpen({
@@ -181,7 +330,6 @@ export const CanvasWithOptions = function (prop: { headerHeight: number }) {
               }
             }}
           >
-            <text>{String(contextMenuOpen)}</text>
             <rect
               x="0"
               y="0"
