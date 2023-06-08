@@ -28,14 +28,16 @@ import { OptionsInCanvas } from "./canvas/optionsInCanvas";
 import {
   CircleOutlined,
   ColorizeRounded,
+  ContentPasteOutlined,
   DeleteRounded,
   RectangleOutlined,
 } from "@mui/icons-material";
 import { useRouter } from "next/router";
 import { colorSettings } from "~/pages/utils/const/routers";
-import { createSVGElement } from "~/pages/utils/charts/generator/util";
 import { select } from "d3";
-import { Chart } from "~/pages/utils/charts/generator/Chart";
+import { RectCommonChart } from "~/pages/utils/charts/generator/Common/Rect";
+import { CircleCommonChart } from "~/pages/utils/charts/generator/Common/Circle";
+import { TextCommonChart } from "~/pages/utils/charts/generator/Common/Text";
 
 export const CanvasContext = createContext<{
   svgRef: null | MutableRefObject<SVGSVGElement | null>;
@@ -108,7 +110,7 @@ const ContextMenu = function (prop: {
   const router = useRouter();
   useEffect(() => {
     if (svgRef && svgRef.current) {
-      svgRef.current.addEventListener("click", (e) => {
+      svgRef.current.addEventListener("click", () => {
         setCurrentNode(null);
       });
     }
@@ -121,9 +123,7 @@ const ContextMenu = function (prop: {
         .attr("stroke-dasharray", "1 1");
       preNode.current = currentNode;
     } else {
-      select(preNode.current)
-        .attr("class", "")
-        .attr("stroke-dasharray", "");
+      select(preNode.current).attr("class", "").attr("stroke-dasharray", "");
     }
   }, [currentNode]);
   return (
@@ -143,7 +143,7 @@ const ContextMenu = function (prop: {
         onClick={() => {
           if (currentNode && currentNode.parentNode) {
             currentNode.parentNode.removeChild(currentNode);
-            setCurrentNode(null)
+            setCurrentNode(null);
           } else {
             ChartController.deleteTarget();
           }
@@ -177,26 +177,13 @@ const ContextMenu = function (prop: {
             rootGroupRef &&
             rootGroupRef.current
           ) {
-            let rect = createSVGElement("rect");
-            let dRect = select(rect);
-            let { centerX, centerY } = Chart.getCenter(
-              svgRef.current,
-              rootGroupRef.current,
+            const rect = new RectCommonChart(
               10,
-              10
+              10,
+              svgRef.current,
+              rootGroupRef.current
             );
-            dRect
-              .attr("x", centerX)
-              .attr("y", centerY)
-              .attr("width", 10)
-              .attr("height", 10)
-              .attr("stroke", "black")
-              .attr("fill", "none");
-            rect.addEventListener("click", function (e) {
-              setCurrentNode(rect);
-              e.stopPropagation();
-            });
-            rootGroupRef.current.appendChild(rect);
+            rect.generateNode(rootGroupRef.current);
           }
           setContextMenuOpen({ ...contextMenuOpen, show: false });
         }}
@@ -214,25 +201,12 @@ const ContextMenu = function (prop: {
             rootGroupRef &&
             rootGroupRef.current
           ) {
-            let circle = createSVGElement("circle");
-            let dCircle = select(circle);
-            let { centerX, centerY } = Chart.getCenter(
+            const circle = new CircleCommonChart(
+              10,
               svgRef.current,
-              rootGroupRef.current,
-              20,
-              20
+              rootGroupRef.current
             );
-            dCircle
-              .attr("cx", centerX + 10)
-              .attr("cy", centerY + 10)
-              .attr("r", 10)
-              .attr("stroke", "black")
-              .attr("fill", "none");
-            circle.addEventListener("click", function (e) {
-              setCurrentNode(circle);
-              e.stopPropagation();
-            });
-            rootGroupRef.current.appendChild(circle);
+            circle.generateNode(rootGroupRef.current);
           }
           setContextMenuOpen({ ...contextMenuOpen, show: false });
         }}
@@ -241,6 +215,29 @@ const ContextMenu = function (prop: {
           <CircleOutlined fontSize="small" />
         </ListItemIcon>
         <ListItemText>圆形</ListItemText>
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          if (
+            svgRef &&
+            svgRef.current &&
+            rootGroupRef &&
+            rootGroupRef.current
+          ) {
+            const svg = svgRef.current;
+            const root = rootGroupRef.current;
+            navigator.clipboard.readText().then((res) => {
+              const text = new TextCommonChart(res, svg, root);
+              text.generateNode(root);
+            });
+          }
+          setContextMenuOpen({ ...contextMenuOpen, show: false });
+        }}
+      >
+        <ListItemIcon>
+          <ContentPasteOutlined fontSize="small" />
+        </ListItemIcon>
+        <ListItemText>粘贴文字</ListItemText>
       </MenuItem>
     </Menu>
   );
