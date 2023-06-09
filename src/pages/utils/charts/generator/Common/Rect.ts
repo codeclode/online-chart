@@ -4,6 +4,22 @@ import { createSVGElement } from "../util";
 import { ChartController } from "../Controller";
 
 export class RectCommonChart extends CommonChart {
+  setFill(value: string): boolean {
+    if (this.node) {
+      select(this.node).selectAll("rect").attr("fill", value);
+      this.fill = value;
+      return true;
+    }
+    return false;
+  }
+  setStroke(value: string): boolean {
+    if (this.node) {
+      select(this.node).selectAll("rect").attr("stroke", value);
+      this.fill = value;
+      return true;
+    }
+    return false;
+  }
   constructor(
     width: number,
     height: number,

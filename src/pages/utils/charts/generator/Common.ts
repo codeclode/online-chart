@@ -2,6 +2,8 @@ import { Chart } from "./Chart";
 
 export abstract class CommonChart extends Chart<string> {
   columns: string[];
+  fill = "none";
+  stroke = "#000000";
   constructor(
     width: number,
     height: number,
@@ -14,4 +16,6 @@ export abstract class CommonChart extends Chart<string> {
     super(centerX, centerY, width, height, "", data);
     this.columns = ["key", "value"];
   }
+  abstract setFill(value: string): boolean;
+  abstract setStroke(value: string): boolean;
 }

@@ -4,6 +4,22 @@ import { createSVGElement } from "../util";
 import { ChartController } from "../Controller";
 
 export class TextCommonChart extends CommonChart {
+  setFill(value: string): boolean {
+    if (this.node) {
+      select(this.node).selectAll("text").attr("fill", value);
+      this.fill = value;
+      return true;
+    }
+    return false;
+  }
+  setStroke(value: string): boolean {
+    if (this.node) {
+      select(this.node).selectAll("text").attr("stroke", value);
+      this.fill = value;
+      return true;
+    }
+    return false;
+  }
   text: string;
   constructor(text: string, svg: SVGSVGElement, root: SVGGElement) {
     const tx = createSVGElement("text");
@@ -17,7 +33,10 @@ export class TextCommonChart extends CommonChart {
   async generateNode(parent: SVGSVGElement | SVGGElement): Promise<boolean> {
     const tx = createSVGElement("text");
     tx.innerHTML = this.text;
-    select(tx).attr("alignment-baseline","before-edge");
+    select(tx)
+      .attr("alignment-baseline", "before-edge")
+      .attr("stroke", "black")
+      .attr("fill", "none");
     const g = createSVGElement("g");
     const dG = select(g);
     dG.attr("transform", `translate(${this.x},${this.y})`).attr(

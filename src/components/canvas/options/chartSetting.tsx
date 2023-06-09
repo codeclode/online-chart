@@ -14,6 +14,9 @@ import {
   TableHead,
   TableRow,
   TableCell,
+  Switch,
+  FormControlLabel,
+  debounce,
 } from "@mui/material";
 import { blue } from "@mui/material/colors";
 import { useState, useEffect, ChangeEvent, MouseEvent } from "react";
@@ -21,6 +24,7 @@ import { ChartController } from "~/pages/utils/charts/generator/Controller";
 import * as schemes from "d3-scale-chromatic";
 import { useRouter } from "next/router";
 import { colorSettings } from "~/pages/utils/const/routers";
+import { CommonChart } from "~/pages/utils/charts/generator/Common";
 
 const origins: {
   name: string;
@@ -63,6 +67,108 @@ const origins: {
     position: "right bottom",
   },
 ];
+
+function CommomColorSet() {
+  const [stroke, setStroke] = useState<string>("#000000");
+  const [fill, setFill] = useState<string>("#000000");
+  const [strokeNone, setStrokeNone] = useState<boolean>(false);
+  const [fillNone, setFillNone] = useState<boolean>(false);
+  const [inited, setInited] = useState<boolean>(false);
+  useEffect(() => {
+    if (
+      ChartController.instance &&
+      ChartController.instance.target &&
+      ChartController.instance.target instanceof CommonChart
+    ) {
+      const target = ChartController.instance.target;
+      if (target.fill === "none") setFillNone(true);
+      else {
+        setFill(target.fill);
+        setFillNone(false);
+      }
+      if (target.stroke === "none") setStrokeNone(true);
+      else {
+        setStroke(target.stroke);
+        setStrokeNone(false);
+      }
+      setInited(true);
+    }
+  }, []);
+  useEffect(() => {
+    if (
+      ChartController.instance &&
+      ChartController.instance.target &&
+      ChartController.instance.target instanceof CommonChart &&
+      inited
+    ) {
+      const target = ChartController.instance.target;
+      target.setFill(fillNone ? "none" : fill);
+    }
+  }, [fill, fillNone]);
+  useEffect(() => {
+    if (
+      ChartController.instance &&
+      ChartController.instance.target &&
+      ChartController.instance.target instanceof CommonChart
+    ) {
+      const target = ChartController.instance.target;
+      target.setStroke(strokeNone ? "none" : stroke);
+    }
+  }, [stroke, strokeNone]);
+  return (
+    <Stack alignItems="center">
+      <Stack alignItems="center" width="85%">
+        <FormControlLabel
+          control={
+            <Switch
+              checked={!strokeNone}
+              onChange={(_e, checked: boolean) => {
+                setStrokeNone(!checked);
+              }}
+            />
+          }
+          value={strokeNone}
+          label="stroke"
+        />
+        <TextField
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            setStroke(e.target.value);
+          }}
+          value={stroke}
+          fullWidth
+          disabled={strokeNone}
+          color="info"
+          type="color"
+          label="stroke"
+        ></TextField>
+      </Stack>
+      <Stack alignItems="center" width="85%">
+        <FormControlLabel
+          control={
+            <Switch
+              checked={!fillNone}
+              onChange={(_e, checked: boolean) => {
+                setFillNone(!checked);
+              }}
+            />
+          }
+          label="fill"
+        />
+        <TextField
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            setFill(e.target.value);
+          }}
+          value={fill}
+          disabled={fillNone}
+          color="info"
+          fullWidth
+          type="color"
+          label="fill"
+        ></TextField>
+      </Stack>
+    </Stack>
+  );
+}
 
 function TransformOriginControl(prop: { chartController: ChartController }) {
   const [origin, setOrigin] = useState<string>("左上");
@@ -201,7 +307,7 @@ export function ChartSetting(prop: { chartController: ChartController }) {
         <Box width="100%" sx={{ borderBottom: 1, borderColor: "divider" }}>
           <TabList
             variant="scrollable"
-            onChange={(event: React.SyntheticEvent, newValue: string) => {
+            onChange={(_e: React.SyntheticEvent, newValue: string) => {
               setTabValue(newValue);
             }}
           >
@@ -283,35 +389,39 @@ export function ChartSetting(prop: { chartController: ChartController }) {
           <ChartDataInfo chartController={chartController}></ChartDataInfo>
         </TabPanel>
         <TabPanel sx={{ width: "95%", m: 0, p: 0 }} value="3">
-          <Button
-            variant="contained"
-            color="info"
-            fullWidth
-            onClick={() => {
-              if (!(chartController.target.colorSet in schemes)) {
-                router.push(
-                  colorSettings + "?id=" + chartController.target.colorSet
-                );
-              } else {
-                window.open(
-                  "https://github.com/d3/d3-scale-chromatic/blob/v3.0.0/README.md#" +
-                    chartController.target.colorSet,
-                  "__blank"
-                );
-              }
-            }}
-          >
-            <Typography
-              textOverflow="ellipsis"
-              sx={{
-                wordWrap: "none",
-                overflow: "hidden",
-                whiteSpace: "nowrap",
+          {!(chartController.target instanceof CommonChart) ? (
+            <Button
+              variant="contained"
+              color="info"
+              fullWidth
+              onClick={() => {
+                if (!(chartController.target.colorSet in schemes)) {
+                  router.push(
+                    colorSettings + "?id=" + chartController.target.colorSet
+                  );
+                } else {
+                  window.open(
+                    "https://github.com/d3/d3-scale-chromatic/blob/v3.0.0/README.md#" +
+                      chartController.target.colorSet,
+                    "__blank"
+                  );
+                }
               }}
             >
-              {chartController.target.colorSet}
-            </Typography>
-          </Button>
+              <Typography
+                textOverflow="ellipsis"
+                sx={{
+                  wordWrap: "none",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {chartController.target.colorSet}
+              </Typography>
+            </Button>
+          ) : (
+            <CommomColorSet></CommomColorSet>
+          )}
         </TabPanel>
       </TabContext>
     </>

@@ -4,6 +4,22 @@ import { createSVGElement } from "../util";
 import { ChartController } from "../Controller";
 
 export class CircleCommonChart extends CommonChart {
+  setFill(value: string): boolean {
+    if (this.node) {
+      select(this.node).selectAll("circle").attr("fill", value);
+      this.fill = value;
+      return true;
+    }
+    return false;
+  }
+  setStroke(value: string): boolean {
+    if (this.node) {
+      select(this.node).selectAll("circle").attr("stroke", value);
+      this.fill = value;
+      return true;
+    }
+    return false;
+  }
   constructor(r: number, svg: SVGSVGElement, root: SVGGElement) {
     super(2 * r, 2 * r, svg, root);
   }
@@ -12,15 +28,15 @@ export class CircleCommonChart extends CommonChart {
     const g = createSVGElement("g");
     const dG = select(g);
     const dCircle = select(circle);
-    const r = this.baseHeight/2
+    const r = this.baseHeight / 2;
     dG.attr("transform", `translate(${this.x},${this.y})`).attr(
       "class",
       "chartContainer"
     );
     dCircle
       .attr("r", r)
-      .attr('cx',r)
-      .attr('cy',r)
+      .attr("cx", r)
+      .attr("cy", r)
       .attr("stroke-width", "0.5")
       .attr("stroke", "black")
       .attr("fill", "none");
