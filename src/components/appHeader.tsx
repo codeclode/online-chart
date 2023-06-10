@@ -19,6 +19,7 @@ import {
   ButtonGroup,
   Divider,
   Fade,
+  Icon,
   IconButton,
   ListItemIcon,
   Menu,
@@ -26,6 +27,7 @@ import {
   Modal,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import Toolbar from "@mui/material/Toolbar";
@@ -38,6 +40,21 @@ import {
   BookOutlined,
   ContactsOutlined,
   Person,
+  Battery20Rounded,
+  BatteryCharging20Rounded,
+  BatteryCharging30Rounded,
+  BatteryCharging50Rounded,
+  BatteryCharging80Rounded,
+  BatteryChargingFullRounded,
+  Battery30Rounded,
+  Battery50Rounded,
+  Battery80Rounded,
+  BatteryFullRounded,
+  SignalWifi4BarRounded,
+  SignalWifiOffRounded,
+  SignalWifi2BarRounded,
+  SignalWifiStatusbar4BarRounded,
+  SignalWifi3BarRounded,
 } from "@mui/icons-material";
 import {
   colorSettings,
@@ -49,6 +66,83 @@ import { useRouter } from "next/router";
 import { indexGuideStepsID } from "~/pages";
 import { useSnackbar } from "notistack";
 import { LoadingButton } from "@mui/lab";
+import { useBattery } from "~/hooks/useBattery";
+import { useNetwork } from "~/hooks/useNetWork";
+
+function WifiIcon() {
+  const [indicator, setIndicator] = useState<boolean>(false);
+  const connect = useNetwork(() => {
+    setIndicator(!indicator);
+  });
+  let icon = <SignalWifi4BarRounded color="success" />;
+
+  if (!connect.inLine) {
+    icon = <SignalWifiOffRounded color="error"/>;
+  } else {
+    switch (connect.level) {
+      case 2: {
+        icon = <SignalWifi2BarRounded color="warning"/>
+        break;
+      }
+      case 3: {
+        icon = <SignalWifi3BarRounded color="secondary" />;
+        break;
+      }
+      case 4: {
+        icon = <SignalWifi4BarRounded color="success"/>;
+        break;
+      }
+      default: {
+        icon = <SignalWifiStatusbar4BarRounded />;
+      }
+    }
+  }
+  return (
+    <Tooltip sx={{ marginX: "6px" }} title={`网络`} arrow>
+      <Icon>{icon}</Icon>
+    </Tooltip>
+  );
+}
+
+function BatteryIcon() {
+  const [indicator, setIndicator] = useState<boolean>(false);
+  const battery = useBattery(() => {
+    setIndicator(!indicator);
+  });
+
+  let icon = <BatteryCharging20Rounded />;
+
+  if (battery.charging) {
+    if (battery.level <= 30) {
+      icon = <BatteryCharging20Rounded color="error" />;
+    } else if (battery.level <= 40) {
+      icon = <BatteryCharging30Rounded color="warning" />;
+    } else if (battery.level <= 60) {
+      icon = <BatteryCharging50Rounded color="success" />;
+    } else if (battery.level <= 90) {
+      icon = <BatteryCharging80Rounded color="success" />;
+    } else {
+      icon = <BatteryChargingFullRounded color="success" />;
+    }
+  } else {
+    if (battery.level <= 30) {
+      icon = <Battery20Rounded color="error" />;
+    } else if (battery.level <= 40) {
+      icon = <Battery30Rounded color="warning" />;
+    } else if (battery.level <= 60) {
+      icon = <Battery50Rounded color="success" />;
+    } else if (battery.level <= 90) {
+      icon = <Battery80Rounded color="success" />;
+    } else {
+      icon = <BatteryFullRounded color="success" />;
+    }
+  }
+  return (
+    <Tooltip sx={{ marginX: "6px" }} title={`电量：${battery.level}%`} arrow>
+      <Icon>{icon}</Icon>
+    </Tooltip>
+  );
+}
 export const AppHeader = forwardRef(function (
   _props,
   ref: ForwardedRef<HTMLDivElement | null>
@@ -238,7 +332,6 @@ export const AppHeader = forwardRef(function (
                   color="info"
                   label="新用户名"
                 />
-                {/* <TextField color="info" label="密码" /> */}
                 <ButtonGroup fullWidth>
                   <LoadingButton
                     loading={infoChanging}
@@ -316,6 +409,8 @@ export const AppHeader = forwardRef(function (
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           ONLINE CHARTS
         </Typography>
+        <BatteryIcon></BatteryIcon>
+        <WifiIcon></WifiIcon>
         {Opts}
       </Toolbar>
     </AppBar>
@@ -334,9 +429,11 @@ function AppMenu(prop: {
       }}
       anchorEl={prop.anchor}
     >
-      <MenuItem onClick={()=>{
-        window.open("/docs/acg","__blank")
-      }}>
+      <MenuItem
+        onClick={() => {
+          window.open("/docs/acg", "__blank");
+        }}
+      >
         <ListItemIcon>
           <BookOutlined style={{ color: bookColor }} />
         </ListItemIcon>
