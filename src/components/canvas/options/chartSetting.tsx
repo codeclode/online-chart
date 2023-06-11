@@ -392,18 +392,21 @@ export function ChartSetting(prop: { chartController: ChartController }) {
             <Button
               variant="contained"
               color="info"
+              disabled={chartController.target.colorSet === ""}
               fullWidth
               onClick={() => {
                 if (!(chartController.target.colorSet in schemes)) {
                   router.push(
                     colorSettings + "?id=" + chartController.target.colorSet
                   );
-                } else {
+                } else if (chartController.target.colorSet === "") {
                   window.open(
                     "https://github.com/d3/d3-scale-chromatic/blob/v3.0.0/README.md#" +
                       chartController.target.colorSet,
                     "__blank"
                   );
+                } else {
+                  return;
                 }
               }}
             >
@@ -415,7 +418,9 @@ export function ChartSetting(prop: { chartController: ChartController }) {
                   whiteSpace: "nowrap",
                 }}
               >
-                {chartController.target.colorSet}
+                {chartController.target.colorSet !== ""
+                  ? chartController.target.colorSet
+                  : "无颜色"}
               </Typography>
             </Button>
           ) : (

@@ -29,6 +29,7 @@ import {
   CircleOutlined,
   ColorizeRounded,
   ContentPasteOutlined,
+  DataSaverOnRounded,
   DeleteRounded,
   RectangleOutlined,
 } from "@mui/icons-material";
@@ -38,6 +39,10 @@ import { select } from "d3";
 import { RectCommonChart } from "~/pages/utils/charts/generator/Common/Rect";
 import { CircleCommonChart } from "~/pages/utils/charts/generator/Common/Circle";
 import { TextCommonChart } from "~/pages/utils/charts/generator/Common/Text";
+import { useSnackbar } from "notistack";
+import { ct } from "~/pages/utils/const/anchorOrigin";
+import { createSVGElement } from "~/pages/utils/charts/generator/util";
+import { SvgInputChart } from "~/pages/utils/charts/generator/Svg";
 
 export const CanvasContext = createContext<{
   svgRef: null | MutableRefObject<SVGSVGElement | null>;
@@ -106,7 +111,9 @@ const ContextMenu = function (prop: {
   const { rootGroupRef, svgRef } = useContext(CanvasContext);
   const [currentNode, setCurrentNode] = useState<null | SVGElement>(null);
   const { contextMenuOpen, setContextMenuOpen } = prop;
+  const { enqueueSnackbar } = useSnackbar();
   const preNode = useRef<null | SVGElement>(null);
+  const fileInputDOM = useRef<null | HTMLInputElement>(null);
   const router = useRouter();
   useEffect(() => {
     if (svgRef && svgRef.current) {
@@ -126,120 +133,180 @@ const ContextMenu = function (prop: {
       select(preNode.current).attr("class", "").attr("stroke-dasharray", "");
     }
   }, [currentNode]);
-  return (
-    <Menu
-      open={contextMenuOpen.show}
-      anchorReference="anchorPosition"
-      anchorPosition={{ top: contextMenuOpen.y, left: contextMenuOpen.x }}
-      onClose={() => {
-        setContextMenuOpen({
-          ...contextMenuOpen,
-          show: false,
-        });
-      }}
-    >
-      <MenuItem
-        disabled={ChartController.instance === null && currentNode === null}
-        onClick={() => {
-          if (currentNode && currentNode.parentNode) {
-            currentNode.parentNode.removeChild(currentNode);
-            setCurrentNode(null);
-          } else {
-            ChartController.deleteTarget();
+  const inputSvg = useCallback(() => {
+    if (fileInputDOM.current) {
+      fileInputDOM.current.click();
+    }
+    setContextMenuOpen({
+      ...contextMenuOpen,
+      show: false,
+    });
+  }, [fileInputDOM.current]);
+  const onFileInput = useCallback(async () => {
+    console.log(123456);
+    if (
+      fileInputDOM.current &&
+      fileInputDOM.current.files &&
+      rootGroupRef &&
+      rootGroupRef.current &&
+      svgRef &&
+      svgRef.current
+    ) {
+      const f = fileInputDOM.current.files[0];
+      if (f) {
+        try {
+          const content = await f.text();
+          const parser = new DOMParser();
+          const svgResult = parser.parseFromString(content, "image/svg+xml");
+          console.log(svgResult);
+          const newSvg = svgResult.getElementsByTagName("svg")[0];
+          if (newSvg) {
+            const svgChart = new SvgInputChart(
+              svgRef.current,
+              rootGroupRef.current,
+              newSvg
+            );
+            svgChart.generateNode(rootGroupRef.current);
           }
+        } catch {
+          enqueueSnackbar({
+            message: "读取错误",
+            variant: "error",
+            anchorOrigin: ct,
+          });
+        }
+      }
+    }
+  }, [svgRef, rootGroupRef, fileInputDOM]);
+  return (
+    <>
+      <input
+        type="file"
+        accept=".svg"
+        hidden
+        ref={fileInputDOM}
+        onInput={onFileInput}
+      ></input>
+      <Menu
+        open={contextMenuOpen.show}
+        anchorReference="anchorPosition"
+        anchorPosition={{ top: contextMenuOpen.y, left: contextMenuOpen.x }}
+        onClose={() => {
           setContextMenuOpen({
             ...contextMenuOpen,
             show: false,
           });
         }}
       >
-        <ListItemIcon>
-          <DeleteRounded fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>删除选中图表</ListItemText>
-      </MenuItem>
-      <MenuItem
-        onClick={() => {
-          router.push(colorSettings);
-        }}
-      >
-        <ListItemIcon>
-          <ColorizeRounded fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>颜色预置</ListItemText>
-      </MenuItem>
-      <Divider />
-      <MenuItem
-        onClick={() => {
-          if (
-            svgRef &&
-            svgRef.current &&
-            rootGroupRef &&
-            rootGroupRef.current
-          ) {
-            const rect = new RectCommonChart(
-              10,
-              10,
-              svgRef.current,
-              rootGroupRef.current
-            );
-            rect.generateNode(rootGroupRef.current);
-          }
-          setContextMenuOpen({ ...contextMenuOpen, show: false });
-        }}
-      >
-        <ListItemIcon>
-          <RectangleOutlined fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>矩形</ListItemText>
-      </MenuItem>
-      <MenuItem
-        onClick={() => {
-          if (
-            svgRef &&
-            svgRef.current &&
-            rootGroupRef &&
-            rootGroupRef.current
-          ) {
-            const circle = new CircleCommonChart(
-              10,
-              svgRef.current,
-              rootGroupRef.current
-            );
-            circle.generateNode(rootGroupRef.current);
-          }
-          setContextMenuOpen({ ...contextMenuOpen, show: false });
-        }}
-      >
-        <ListItemIcon>
-          <CircleOutlined fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>圆形</ListItemText>
-      </MenuItem>
-      <MenuItem
-        onClick={() => {
-          if (
-            svgRef &&
-            svgRef.current &&
-            rootGroupRef &&
-            rootGroupRef.current
-          ) {
-            const svg = svgRef.current;
-            const root = rootGroupRef.current;
-            navigator.clipboard.readText().then((res) => {
-              const text = new TextCommonChart(res, svg, root);
-              text.generateNode(root);
+        <MenuItem
+          disabled={ChartController.instance === null && currentNode === null}
+          onClick={() => {
+            if (currentNode && currentNode.parentNode) {
+              currentNode.parentNode.removeChild(currentNode);
+              setCurrentNode(null);
+            } else {
+              ChartController.deleteTarget();
+            }
+            setContextMenuOpen({
+              ...contextMenuOpen,
+              show: false,
             });
-          }
-          setContextMenuOpen({ ...contextMenuOpen, show: false });
-        }}
-      >
-        <ListItemIcon>
-          <ContentPasteOutlined fontSize="small" />
-        </ListItemIcon>
-        <ListItemText>粘贴文字</ListItemText>
-      </MenuItem>
-    </Menu>
+          }}
+        >
+          <ListItemIcon>
+            <DeleteRounded fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>删除选中图表</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            router.push(colorSettings);
+          }}
+        >
+          <ListItemIcon>
+            <ColorizeRounded fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>颜色预置</ListItemText>
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => {
+            if (
+              svgRef &&
+              svgRef.current &&
+              rootGroupRef &&
+              rootGroupRef.current
+            ) {
+              const rect = new RectCommonChart(
+                10,
+                10,
+                svgRef.current,
+                rootGroupRef.current
+              );
+              rect.generateNode(rootGroupRef.current);
+            }
+            setContextMenuOpen({ ...contextMenuOpen, show: false });
+          }}
+        >
+          <ListItemIcon>
+            <RectangleOutlined fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>矩形</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (
+              svgRef &&
+              svgRef.current &&
+              rootGroupRef &&
+              rootGroupRef.current
+            ) {
+              const circle = new CircleCommonChart(
+                10,
+                svgRef.current,
+                rootGroupRef.current
+              );
+              circle.generateNode(rootGroupRef.current);
+            }
+            setContextMenuOpen({ ...contextMenuOpen, show: false });
+          }}
+        >
+          <ListItemIcon>
+            <CircleOutlined fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>圆形</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (
+              svgRef &&
+              svgRef.current &&
+              rootGroupRef &&
+              rootGroupRef.current
+            ) {
+              const svg = svgRef.current;
+              const root = rootGroupRef.current;
+              navigator.clipboard.readText().then((res) => {
+                const text = new TextCommonChart(res, svg, root);
+                text.generateNode(root);
+              });
+            }
+            setContextMenuOpen({ ...contextMenuOpen, show: false });
+          }}
+        >
+          <ListItemIcon>
+            <ContentPasteOutlined fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>粘贴文字</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={inputSvg}>
+          <ListItemIcon>
+            <DataSaverOnRounded fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>导入svg</ListItemText>
+        </MenuItem>
+      </Menu>
+    </>
   );
 };
 
